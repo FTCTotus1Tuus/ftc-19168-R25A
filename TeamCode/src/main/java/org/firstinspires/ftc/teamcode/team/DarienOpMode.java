@@ -7,13 +7,6 @@ package org.firstinspires.ftc.teamcode.team;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
-import com.qualcomm.robotcore.hardware.TouchSensor;
-
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
@@ -23,6 +16,9 @@ public class DarienOpMode extends LinearOpMode {
     public DcMotor omniMotor1; // right front
     public DcMotor omniMotor2; // left rear
     public DcMotor omniMotor3; // right rear
+    public DcMotor slideMotor1;
+
+
     //    public IMU imu;
     public GoBildaPinpointDriver odo;
 
@@ -31,11 +27,6 @@ public class DarienOpMode extends LinearOpMode {
     public double wheelDiameter = 3.75; // inches
     public double constMult = (wheelDiameter * (Math.PI));
     public double inchesToEncoder = encoderResolution / constMult;
-    public static double rotationTolerance = 2; //in degrees
-    public static double power = 0.3;
-    public static double powerIntakeWheelToPickupSample = 0.9;
-    public static double powerIntakeWheelToEjectSample = -0.25;
-    public static double powerIntakeSlideIn = -0.45;
     public static double PI = 3.1416;
 
     // HARDWARE TUNING CONSTANTS
@@ -45,52 +36,7 @@ public class DarienOpMode extends LinearOpMode {
     public double turboDivBy = 1;
     public boolean turboBoost;
 
-    // Servo tuning constants
-
-    public static double bucketPickup = 0.6;
-    public static double bucketPlace = 0.45;
-    public static double bucketUp = 0.9;
-
-    public static double specimenWristPlace = 0.20; // towards inside of robot - change name later?
-    public static double specimenWristPickup = 0.82;
-
-    public static double POS_SAMPLE_PITCH_DROP_BUCKET = 0.2;
-    public static double POS_SAMPLE_PITCH_ARM_DOWN = 0.4;
-    public static double POS_SAMPLE_PITCH_PICKUP_READY = 0.43;
-    public static double POS_SAMPLE_PITCH_PICKUP = 0.65;
-
-    public static double POS_SAMPLE_YAW_LEFT_MAX = 0.3;
-    public static double POS_SAMPLE_YAW_LEFT2 = 0.3;
-    public static double POS_SAMPLE_YAW_LEFT1 = 0.4;
-    public static double POS_SAMPLE_YAW_CENTER = 0.5;
-    public static double POS_SAMPLE_YAW_RIGHT1 = 0.6;
-    public static double POS_SAMPLE_YAW_RIGHT2 = 0.7;
-    public static double POS_SAMPLE_YAW_RIGHT_MAX = 0.8;
-
-    public static double sampleClawOpenWide = 0.95;
-    public static double sampleClawOpen = 0.85;
-    public static double sampleClawClosed = 0.74;
-
-    public static double intakeWristGroundPosition = 0.7;
-    public static double intakeWristUpPosition = 0.43;
-
     //vertical slide positions
-    public static int highChamberBelowPos = 1750;
-    public static int highChamberPlacePos = 2300;
-    public static int barPlace1Pos = 950;
-    public static int basketLowPos = 2450;
-    public static int basketHighPos = 4380;
-    public static int armGroundPos = 0;
-
-    // calibrated for torque servo
-    public static double specimenClawOpen = 0.94;
-    public static double specimenClawClosed = 0.83;
-    public static double specimenClawClosedTight = specimenClawClosed - 0.03;
-
-    // Variables to track servo position
-    private double sampleYawCurrentPosition;
-    private double intakeWristCurrentPosition;
-
     @Override
     public void runOpMode() throws InterruptedException {
     }
@@ -107,11 +53,13 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor1 = initializeMotor("omniMotor1");
         omniMotor2 = initializeMotor("omniMotor2");
         omniMotor3 = initializeMotor("omniMotor3");
+        slideMotor1 = initializeMotor("slideMotor1");
 
         omniMotor0.setDirection(DcMotor.Direction.REVERSE);
         omniMotor1.setDirection(DcMotor.Direction.FORWARD);
         omniMotor2.setDirection(DcMotor.Direction.FORWARD);
         omniMotor3.setDirection(DcMotor.Direction.REVERSE);
+        slideMotor1.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();

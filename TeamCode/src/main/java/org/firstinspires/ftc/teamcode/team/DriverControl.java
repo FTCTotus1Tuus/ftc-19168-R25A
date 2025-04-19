@@ -15,10 +15,7 @@ public class DriverControl extends DarienOpModeTeleop {
 
             //pollSensors();
             runDriveSystem();
-            runIntakeSystem();
-            runVerticalSlideSystem();
-            runSpecimenSystem();
-            runLift1System();
+            runSlideMotorSystem();
 
             telemetry.update();
 

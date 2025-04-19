@@ -31,20 +31,11 @@ public class DarienOpModeTeleop extends DarienOpMode {
     /**
      * If the GP1 left bumper is pressed, spin the boot wheels in if the joystick is pulled down or spin the boot wheels out if the joystick is pushed up.
      */
-    public void runIntakeSystem() {
+
+    public void runSlideMotorSystem() {
+        slideMotor1.setPower(.5*gamepad2.right_stick_y);
     }
 
-    public void runVerticalSlideSystem() {
-    }
-
-    public void runLift1System() {
-          }
-
-    public void liftLock() {
-    }
-
-    public void runSpecimenSystem() {
-    }
 
     public void runDriveSystem() {
         direction[0] = Math.pow(-gamepad1.left_stick_x, 5);
