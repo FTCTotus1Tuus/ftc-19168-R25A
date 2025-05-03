@@ -33,7 +33,9 @@ public class DarienOpModeTeleop extends DarienOpMode {
      */
 
     public void runSlideMotorSystem() {
-        slideMotor1.setPower(.5*gamepad2.right_stick_y);
+        double power = 0.5;
+        double turbo = (1-power)*gamepad2.right_trigger; // the sum of turbo + power should max at 1.
+        slideMotor1.setPower(gamepad2.right_stick_y * (power + turbo));
     }
 
 

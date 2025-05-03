@@ -20,7 +20,8 @@ public class DriverControl extends DarienOpModeTeleop {
             telemetry.update();
 
             if (gamepad1.a){
-                scoringLowBasket(0.1, [0,0.1]);
+                double[] robotPower = {0,0.1};
+                scoringLowBasket(0.1, robotPower);
                 
 
             }
@@ -32,7 +33,7 @@ public class DriverControl extends DarienOpModeTeleop {
 
     public void scoringLowBasket(double slideMotor1Power, double[] MoveRobotPower) {
          slideMotor1.setPower(slideMotor1Power);
-         MoveRobot(MoveRobotPower,0,0);
+         MoveRobot(MoveRobotPower,0,false);
 
          
          // if the robot reaches the b positions for both the arm and the position, stop moving
