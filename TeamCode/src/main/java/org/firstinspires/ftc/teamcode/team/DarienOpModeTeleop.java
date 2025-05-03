@@ -33,9 +33,32 @@ public class DarienOpModeTeleop extends DarienOpMode {
      */
 
     public void runSlideMotorSystem() {
-        double power = 0.5;
+        telemetry.addData("y=", gamepad2.right_stick_y);
+        telemetry.addData("encodervalue=", slideMotor1.getCurrentPosition());
+        telemetry.update();
+
+        double power = -0.6;
         double turbo = (1-power)*gamepad2.right_trigger; // the sum of turbo + power should max at 1.
-        slideMotor1.setPower(gamepad2.right_stick_y * (power + turbo));
+        //slideMotor1.setPower(gamepad2.right_stick_y * (power + turbo));
+        if ((gamepad2.right_stick_y < 0 && slideMotor1.getCurrentPosition() <= 2200) ||
+            (gamepad2.right_stick_y > 0 && slideMotor1.getCurrentPosition() >= 100)){
+            // SAFE ZONE NORMAL POWER
+            slideMotor1.setPower(gamepad2.right_stick_y * (power));
+        } else {
+            if ((gamepad2.right_stick_y < 0 && slideMotor1.getCurrentPosition() <= 2300) ||
+                    (gamepad2.right_stick_y > 0 && slideMotor1.getCurrentPosition() >= 0)){
+                // DANGER ZONE HALF POWER
+                slideMotor1.setPower(gamepad2.right_stick_y * (0.5) * (power));
+            } else {
+                // END ZONE STOP
+                slideMotor1.setPower(0);
+            }
+        }
+
+
+        //A: when right stick y set power to 1
+        //B: when encoder reaches certain limit, slow down power
+        //
     }
 
 

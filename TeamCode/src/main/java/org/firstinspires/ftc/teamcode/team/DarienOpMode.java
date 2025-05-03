@@ -59,7 +59,7 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor1.setDirection(DcMotor.Direction.FORWARD);
         omniMotor2.setDirection(DcMotor.Direction.FORWARD);
         omniMotor3.setDirection(DcMotor.Direction.REVERSE);
-        slideMotor1.setDirection(DcMotor.Direction.FORWARD);
+        slideMotor1.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();
