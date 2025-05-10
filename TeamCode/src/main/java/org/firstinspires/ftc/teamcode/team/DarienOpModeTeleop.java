@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.team;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class DarienOpModeTeleop extends DarienOpMode {
@@ -22,11 +23,44 @@ public class DarienOpModeTeleop extends DarienOpMode {
 
     public static int highChamberBelowPos = 1600;
 
+    public static double liftServo0Min = 0.15;
+    public static double liftServo0Max = 0.60;
+    protected double liftServo0CurrentPosition = liftServo0Min;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.update(); // Send telemetry to the driver controller only here.
     }
+
+    public void runLiftSystem() {
+
+        if (gamepad2.dpad_up) {
+            setTrackablePosition(liftServo0,getTrackablePosition() + 0.001, liftServo0Min, liftServo0Max);
+        } else if (gamepad2.dpad_down) {
+            setTrackablePosition(liftServo0,getTrackablePosition() - 0.001, liftServo0Min, liftServo0Max);
+        }
+        telemetry.addData("lift1 pos: ", getTrackablePosition());
+        telemetry.update();
+
+//        if(gamepad2.dpad_up){
+//            liftServo0.setPosition(liftServo0Position);
+//        }
+    }
+    public void setTrackablePosition(Servo theServo, double targetPosition, double min, double max) {
+        telemetry.addData("lift targetPos: ", targetPosition);
+        telemetry.update();
+
+        if (min <= targetPosition && targetPosition <= max) {
+            theServo.setPosition(targetPosition);
+            liftServo0CurrentPosition = targetPosition;
+        }
+    }
+
+    public double getTrackablePosition() {
+        return liftServo0CurrentPosition;
+    }
+
 
     /**
      * If the GP1 left bumper is pressed, spin the boot wheels in if the joystick is pulled down or spin the boot wheels out if the joystick is pushed up.
@@ -35,13 +69,12 @@ public class DarienOpModeTeleop extends DarienOpMode {
     public void runSlideMotorSystem() {
         telemetry.addData("y=", gamepad2.right_stick_y);
         telemetry.addData("encodervalue=", slideMotor1.getCurrentPosition());
-        telemetry.update();
 
         double power = -0.6;
         double turbo = (1-power)*gamepad2.right_trigger; // the sum of turbo + power should max at 1.
         //slideMotor1.setPower(gamepad2.right_stick_y * (power + turbo));
         if ((gamepad2.right_stick_y < 0 && slideMotor1.getCurrentPosition() <= 2200) ||
-            (gamepad2.right_stick_y > 0 && slideMotor1.getCurrentPosition() >= 100)){
+                (gamepad2.right_stick_y > 0 && slideMotor1.getCurrentPosition() >= 100)){
             // SAFE ZONE NORMAL POWER
             slideMotor1.setPower(gamepad2.right_stick_y * (power));
         } else {
@@ -77,7 +110,7 @@ public class DarienOpModeTeleop extends DarienOpMode {
         telemetry.addData("slide encoder = ", motor.getCurrentPosition());
 
         int minTolerance = 10, maxTolerance = 0;
-        
+
         // Ensure input power is between 0 and 1.
         double power = (defaultMaxPower > 1 || defaultMaxPower < 0) ? 1 : defaultMaxPower;
 

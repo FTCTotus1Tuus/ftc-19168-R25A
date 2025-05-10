@@ -17,7 +17,7 @@ public class DriverControl extends DarienOpModeTeleop {
             runDriveSystem();
             //runSlideMotorSystem();
             runMotorWithEncoderStops(slideMotor1, gamepad2.right_stick_y, 0.6, 0, 100, 2300, 100);
-
+            runLiftSystem();
             telemetry.update();
 
             if (gamepad1.a){

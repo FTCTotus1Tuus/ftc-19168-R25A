@@ -6,6 +6,7 @@ package org.firstinspires.ftc.teamcode.team;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @Config
@@ -17,6 +18,7 @@ public class DarienOpMode extends LinearOpMode {
     public DcMotor omniMotor2; // left rear
     public DcMotor omniMotor3; // right rear
     public DcMotor slideMotor1;
+    public Servo liftServo0;
 
 
     //    public IMU imu;
@@ -47,6 +49,9 @@ public class DarienOpMode extends LinearOpMode {
 
         // Initialize 2 Deadwheel odometry
         configure2DeadWheel();
+
+        // INITIALIZE SERVOS
+        liftServo0 = hardwareMap.get(Servo.class, "liftServo0");
 
         // INITIALIZE MOTORS
         omniMotor0 = initializeMotor("omniMotor0");
