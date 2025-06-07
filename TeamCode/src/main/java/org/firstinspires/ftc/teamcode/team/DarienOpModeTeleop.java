@@ -105,10 +105,10 @@ public class DarienOpModeTeleop extends DarienOpMode {
      * @param encoderMax the upper limit of the encoder value, such as 2300;
      * @param encoderMaxStartSlowdown the number of encoder ticks from which to slow down the motor when approaching the upper limit, such as 100.
      */
-    public void runMotorWithEncoderStops(DcMotor motor, float driverInput, double defaultMaxPower, int encoderMin, int encoderMinStartSlowdown, int encoderMax, int encoderMaxStartSlowdown) {
-        telemetry.addData("slide driver Input = ", driverInput);
-        telemetry.addData("slide encoder = ", motor.getCurrentPosition());
-
+    public void runMotorWithEncoderStops(DcMotor motor, float driverInput, String MotorName, double defaultMaxPower, int encoderMin, int encoderMinStartSlowdown, int encoderMax, int encoderMaxStartSlowdown) {
+        telemetry.addData(MotorName.concat(" Driver Input"), driverInput);
+        telemetry.addData(MotorName.concat(" Current Position"), motor.getCurrentPosition());
+        telemetry.addData("stop",0);
         int minTolerance = 10, maxTolerance = 0;
 
         // Ensure input power is between 0 and 1.
