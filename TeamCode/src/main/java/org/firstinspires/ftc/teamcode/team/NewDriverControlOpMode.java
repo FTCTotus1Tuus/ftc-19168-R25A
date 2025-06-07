@@ -7,18 +7,19 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp//(name="DC", group="DriverControl")
 @Config
 public class NewDriverControlOpMode extends DarienOpModeTeleop {
+    public static double tilt_pgain = .03;
+    public static double tilt_igain = .0003;
+    public static double tilt_gain = 1;
+    public static double T2 = 400;
+    public static double T1 = -25;
+
     @Override
     public void runOpMode() {
         initControls();
         waitForStart();
         //Start
         double tilt_power = 0, tilt_iduty = 0, tilt_pduty = 0;
-        double tilt_pgain = .002;
-        //double tilt_igain = .00001;
-        double tilt_igain = .00000;
-        double tilt_sp = 0;
-        double T2=440;
-        double T1=-25;
+        double tilt_sp = T1;
 
         while (this.opModeIsActive()) {
 
@@ -29,12 +30,14 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
            // runMotorWithEncoderStops(tiltMotor, gamepad2.left_stick_y,"Tilt" ,-1, 0, 100, 2300, 100);
 
             //-25 to 440
-            tilt_sp = clamp(gamepad2.left_stick_y * -1, 0.0, 1.0) * (T2-T1) + T1;
+           //tilt_sp = clamp(gamepad2.left_stick_y * -1, 0.0, 1.0) * (T2-T1) + T1;
+
+            tilt_sp = clamp(tilt_sp - gamepad2.left_stick_y * tilt_gain, T1, T2);
 
             //tilt_iduty = tilt_power;
             tilt_pduty = clamp(tilt_pgain * (tilt_sp - tiltMotor.getCurrentPosition()), -.5, 0.8);
-            tilt_iduty = 0 * clamp(tilt_igain * (tilt_sp - tiltMotor.getCurrentPosition()) + tilt_iduty, -0.2, 1);
-            tilt_power = clamp(tilt_pduty + tilt_iduty, 0.0, 1.0);
+            tilt_iduty = clamp(tilt_igain * (tilt_sp - tiltMotor.getCurrentPosition()) + tilt_iduty, -0.2, 1);
+            tilt_power = clamp(tilt_pduty + tilt_iduty, -0.5, 1.0);
 
             tiltMotor.setPower(tilt_power);
 
