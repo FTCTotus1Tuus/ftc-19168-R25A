@@ -10,22 +10,7 @@ public class DarienOpModeTeleop extends DarienOpMode {
 
     public double[] direction = {0.0, 0.0};
     public double rotation;
-    public static double verticalSlideMaxHeight = 4400;
-    public static double lift1MaxHeight = 3700;
-    public double durationSecondsIntakeSlideIn = 2;
-    public boolean startedIntakeSlide = false;
-    public double startTime = 0;
-    private double intakeWristStartTime = 0;
-    private boolean samplePitchAvoidArm = false;
-    boolean bucketIsUp = true;
-    boolean isMovingToBelowPos = false;
-    boolean isArmMovingDown = false;
 
-    public static int highChamberBelowPos = 1600;
-
-    public static double liftServo0Min = 0.15;
-    public static double liftServo0Max = 0.60;
-    protected double liftServo0CurrentPosition = liftServo0Min;
 
 
     @Override
@@ -33,33 +18,7 @@ public class DarienOpModeTeleop extends DarienOpMode {
         telemetry.update(); // Send telemetry to the driver controller only here.
     }
 
-    public void runLiftSystem() {
 
-        if (gamepad2.dpad_up) {
-            setTrackablePosition(liftServo0,getTrackablePosition() + 0.001, liftServo0Min, liftServo0Max);
-        } else if (gamepad2.dpad_down) {
-            setTrackablePosition(liftServo0,getTrackablePosition() - 0.001, liftServo0Min, liftServo0Max);
-        }
-        telemetry.addData("lift1 pos: ", getTrackablePosition());
-        telemetry.update();
-
-//        if(gamepad2.dpad_up){
-//            liftServo0.setPosition(liftServo0Position);
-//        }
-    }
-    public void setTrackablePosition(Servo theServo, double targetPosition, double min, double max) {
-        telemetry.addData("lift targetPos: ", targetPosition);
-        telemetry.update();
-
-        if (min <= targetPosition && targetPosition <= max) {
-            theServo.setPosition(targetPosition);
-            liftServo0CurrentPosition = targetPosition;
-        }
-    }
-
-    public double getTrackablePosition() {
-        return liftServo0CurrentPosition;
-    }
 
 
     /**
