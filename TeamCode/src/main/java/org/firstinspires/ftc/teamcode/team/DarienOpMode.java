@@ -7,6 +7,7 @@ package org.firstinspires.ftc.teamcode.team;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
@@ -63,7 +64,7 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor2.setDirection(DcMotor.Direction.FORWARD);
         omniMotor3.setDirection(DcMotor.Direction.REVERSE);
         slideMotor1.setDirection(DcMotor.Direction.REVERSE);
-        tiltMotor.setDirection(DcMotor.Direction.REVERSE);
+        tiltMotor.setDirection(DcMotor.Direction.FORWARD);
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();

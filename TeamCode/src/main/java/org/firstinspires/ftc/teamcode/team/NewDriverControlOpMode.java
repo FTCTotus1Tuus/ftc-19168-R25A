@@ -10,8 +10,8 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     public static double tilt_pgain = .03;
     public static double tilt_igain = .0003;
     public static double tilt_gain = 1;
-    public static double T2 = 400;
-    public static double T1 = -25;
+    public static double T2 = 650;
+    public static double T1 = 20;
 
     @Override
     public void runOpMode() {
@@ -37,7 +37,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             //tilt_iduty = tilt_power;
             tilt_pduty = clamp(tilt_pgain * (tilt_sp - tiltMotor.getCurrentPosition()), -.5, 0.8);
             tilt_iduty = clamp(tilt_igain * (tilt_sp - tiltMotor.getCurrentPosition()) + tilt_iduty, -0.2, 1);
-            tilt_power = clamp(tilt_pduty + tilt_iduty, -0.5, 1.0);
+            tilt_power = clamp(tilt_pduty + tilt_iduty, -0.3, 0.3);
 
             tiltMotor.setPower(tilt_power);
 
@@ -45,7 +45,6 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             telemetry.addData("Iduty: ", tilt_iduty);
             telemetry.addData("tiltPos: ", tiltMotor.getCurrentPosition());
             telemetry.addData("tiltsp: ", tilt_sp);
-
             telemetry.update();
 
 
