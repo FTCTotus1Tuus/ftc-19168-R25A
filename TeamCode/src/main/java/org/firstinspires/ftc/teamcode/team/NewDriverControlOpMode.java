@@ -22,11 +22,11 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
         double tilt_sp = T1;
 
         while (this.opModeIsActive()) {
-
+            runClaw();
             //pollSensors();
             runDriveSystem();
             //runSlideMotorSystem();
-            runMotorWithEncoderStops(slideMotor1, gamepad2.right_stick_y,"Slide",0.6, 0, 100, 2300, 100);
+            runMotorWithEncoderStops(slideMotor1, gamepad2.right_stick_y,"Slide",0.6, 0, 100, 4300, 100);
            // runMotorWithEncoderStops(tiltMotor, gamepad2.left_stick_y,"Tilt" ,-1, 0, 100, 2300, 100);
 
             //-25 to 440
@@ -37,7 +37,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             //tilt_iduty = tilt_power;
             tilt_pduty = clamp(tilt_pgain * (tilt_sp - tiltMotor.getCurrentPosition()), -.5, 0.8);
             tilt_iduty = clamp(tilt_igain * (tilt_sp - tiltMotor.getCurrentPosition()) + tilt_iduty, -0.2, 1);
-            tilt_power = clamp(tilt_pduty + tilt_iduty, -0.3, 0.3);
+            tilt_power = clamp(tilt_pduty + tilt_iduty, -0.5, 1.0);
 
             tiltMotor.setPower(tilt_power);
 

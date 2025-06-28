@@ -8,6 +8,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
@@ -19,7 +20,7 @@ public class DarienOpMode extends LinearOpMode {
     public DcMotor omniMotor3; // right rear
     public DcMotor slideMotor1;
     public DcMotor tiltMotor;
-
+    public Servo claw;
 
     //    public IMU imu;
     public GoBildaPinpointDriver odo;
@@ -50,7 +51,7 @@ public class DarienOpMode extends LinearOpMode {
         configure2DeadWheel();
 
         // INITIALIZE SERVOS
-
+        claw = hardwareMap.get(Servo.class,"claw");
         // INITIALIZE MOTORS
         omniMotor0 = initializeMotor("omniMotor0");
         omniMotor1 = initializeMotor("omniMotor1");
