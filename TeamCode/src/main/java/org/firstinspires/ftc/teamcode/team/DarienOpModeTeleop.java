@@ -10,20 +10,20 @@ public class DarienOpModeTeleop extends DarienOpMode {
 
     public double[] direction = {0.0, 0.0};
     public double rotation;
-    public static double CLOSED_CLAW = 0.6;
-    public static double OPEN_CLAW = 0.89;
-
+    public static double CLOSED_CLAW = 0.96;
+    public static double OPEN_CLAW = 0.7;
+    public static double rtvoltage = 0.01;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.update(); // Send telemetry to the driver controller only here.
     }
     public void runClaw(){
-        if (gamepad2.right_trigger > 0){
+        if (gamepad2.right_trigger > rtvoltage){
             //if right trigger is pressed, claw is opened depending on how much the trigger is pressed
-            claw.setPosition(OPEN_CLAW);
-        }
-        else {
+            claw.setPosition((OPEN_CLAW-CLOSED_CLAW)*gamepad2.right_trigger+CLOSED_CLAW);
+
+        } else {
             //if right trigger is not pressed, claw is closed
             claw.setPosition(CLOSED_CLAW);
         }
