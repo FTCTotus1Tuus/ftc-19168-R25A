@@ -26,7 +26,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             //pollSensors();
             runDriveSystem();
             //runSlideMotorSystem();
-            runMotorWithEncoderStops(slideMotor1, gamepad2.right_stick_y,"Slide",0.6, 0, 100, 4300, 100);
+            runMotorWithEncoderStops(slideMotor1, gamepad2.right_stick_y,"Slide",0.6, 0, 100, 3900, 100);
            // runMotorWithEncoderStops(tiltMotor, gamepad2.left_stick_y,"Tilt" ,-1, 0, 100, 2300, 100);
 
             //-25 to 440
