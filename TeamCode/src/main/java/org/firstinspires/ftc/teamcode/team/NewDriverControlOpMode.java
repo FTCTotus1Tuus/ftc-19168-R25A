@@ -18,7 +18,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     public static double slide_igain = .0004;
     public static double slide_gain = 15;
     public static double S2 = 3900;
-    public static double S1 = 30;
+    public static double S1 = 0;
     private MotorHelper tiltMotorHelper;
     private MotorHelper slideMotorHelper;
 

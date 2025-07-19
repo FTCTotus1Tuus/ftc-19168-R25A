@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.team;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -29,6 +27,11 @@ public class MotorHelper{
         this.pduty = clamp(pgain * (this.clampedsetpoint - Motor.getCurrentPosition()), pdutyMin, pdutyMax);
         this.iduty = clamp(igain * (this.clampedsetpoint - Motor.getCurrentPosition()) + iduty, idutyMin, idutyMax);
         this.power = clamp(this.pduty + this.iduty, powerMin, powerMax);
+
+        // kills motor when it should be at rest
+        if(setpoint <= bottomStop + 10 && Motor.getCurrentPosition() <= bottomStop + 10){
+            Motor.setPower(0);
+        }
 
         if(isTelemetryShown) {
             telemetry.addData("Pduty: ", pduty);
