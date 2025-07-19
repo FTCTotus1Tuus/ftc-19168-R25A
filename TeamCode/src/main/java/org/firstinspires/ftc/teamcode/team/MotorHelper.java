@@ -4,17 +4,20 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-public class MotorHelper{
+public class MotorHelper {
     private double pduty, power, iduty, clampedsetpoint;
     private final Telemetry telemetry;
-    public MotorHelper(Telemetry telemetry){
+
+    public MotorHelper(Telemetry telemetry) {
         this.pduty = 0;
         this.power = 0;
         this.iduty = 0;
         this.clampedsetpoint = 0;
-        this.telemetry=telemetry;
+        this.telemetry = telemetry;
     }
-    /** pid
+
+    /**
+     * pid
      * Proportional-integral controller for a DcMotor.
      * Returns the power required to maintain the motor encoder at a desired set point.
      * Written by Vivan, Mario, and Aiden
@@ -29,11 +32,11 @@ public class MotorHelper{
         this.power = clamp(this.pduty + this.iduty, powerMin, powerMax);
 
         // kills motor when it should be at rest
-        if(setpoint <= bottomStop + 10 && Motor.getCurrentPosition() <= bottomStop + 10){
+        if (setpoint <= bottomStop + 10 && Motor.getCurrentPosition() <= bottomStop + 10) {
             Motor.setPower(0);
         }
 
-        if(isTelemetryShown) {
+        if (isTelemetryShown) {
             telemetry.addData("Pduty: ", pduty);
             telemetry.addData("Iduty: ", iduty);
             telemetry.addData("Motor Encoder: ", Motor.getCurrentPosition());

@@ -56,7 +56,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                     tiltMotor,
                     tilt_pgain,
                     tilt_igain,
-                    tiltMotorPID[2], -.5, 0.8, -0.2, 1, tiltMotorPID[1],-.5, 1,
+                    tiltMotorPID[2], -.5, 0.8, -0.2, 1, tiltMotorPID[1], -.5, 1,
                     tilt_gain,
                     T1,
                     T2,

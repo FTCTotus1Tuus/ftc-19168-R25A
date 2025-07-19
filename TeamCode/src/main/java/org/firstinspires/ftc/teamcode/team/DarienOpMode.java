@@ -51,7 +51,7 @@ public class DarienOpMode extends LinearOpMode {
         configure2DeadWheel();
 
         // INITIALIZE SERVOS
-        claw = hardwareMap.get(Servo.class,"claw");
+        claw = hardwareMap.get(Servo.class, "claw");
         // INITIALIZE MOTORS
         omniMotor0 = initializeMotor("omniMotor0");
         omniMotor1 = initializeMotor("omniMotor1");
