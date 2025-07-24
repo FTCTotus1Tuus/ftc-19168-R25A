@@ -109,7 +109,7 @@ public class DarienOpMode extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(0, 165); //these are tuned for 2/5/2025 robot
+        odo.setOffsets(82, -100); //these are tuned for 7/23/2025 robot with length of 288mm and width of 366mm.
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
@@ -126,7 +126,7 @@ public class DarienOpMode extends LinearOpMode {
         increase when you move the robot forward. And the Y (strafe) pod should increase when
         you move the robot to the left.
          */
-        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.FORWARD, GoBildaPinpointDriver.EncoderDirection.FORWARD); //TODO check and fix these values
+        odo.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD); //TODO check and fix these values
 
 
         /*
