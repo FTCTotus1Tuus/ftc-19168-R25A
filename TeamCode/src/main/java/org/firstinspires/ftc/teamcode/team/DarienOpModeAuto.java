@@ -7,9 +7,11 @@ import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 //import org.apache.commons.math3.geometry.euclidean.twod.Line;
 
@@ -17,16 +19,19 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 @Config
 public class DarienOpModeAuto extends DarienOpMode {
 
+    public WebcamName webcam1;
+    public VisionPortal visionPortal;
+    public ImageProcess imageProcess;
     public static double movement_igain = 0;
     public static double movement_pgain = 0.06;
     public static double distanceToSlowdown = 4; //Inches
     public static double slowdownPower = 0.35;
+    public double[] tiltMotorPID = {0, 0, 0, 0};
+    public double[] slideMotorPID = {0, 0, 0, 0};
 
     public static double normalPower = 0.3;
     public static double verticalSlidePower = 1; //swapped to 1 from 0.8 needs testing
     public static double strafingInefficiencyFactor = 1.145;
-
-//    public static double sampleClawClosed = 0.83;
 
     public double movementStartTime;
 
@@ -57,17 +62,34 @@ public class DarienOpModeAuto extends DarienOpMode {
 
     public double currentPosition = 0;
     public static double rotationEncoderConstant = 557;
+    public MotorHelper tiltMotorHelper;
+    public MotorHelper slideMotorHelper;
 
     @Override
     public void initControls() {
         super.initControls();
+        tiltMotorHelper = new MotorHelper(telemetry);
+        slideMotorHelper = new MotorHelper(telemetry);
+        webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
+        // true = blue false = red
+        imageProcess = new ImageProcess();
 
+        // Create the vision portal by using a builder.
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+
+        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+
+        builder.addProcessor(imageProcess);
+
+        // Build the Vision Portal, using the above settings.
+        visionPortal = builder.build();
         // reverse motors 2 and 3
         omniMotor2.setDirection(DcMotor.Direction.REVERSE);
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
 
+
         odo.resetPosAndIMU();
-        
+
         dashboard = FtcDashboard.getInstance();
 
 
@@ -125,6 +147,47 @@ public class DarienOpModeAuto extends DarienOpMode {
         setRunMode();
         setPower(power, adjX, adjY, 0);
     }
+
+    public void autoRotate(double targetPosDegrees, double power) {
+        //direction counter clockwise is -1 clockwise is 1
+
+        double error = getErrorRot(targetPosDegrees);
+        boolean isRotating = true;
+        double direction = Math.signum(error);
+        setRotatePower(power, direction);
+
+        if (Math.abs(error) <= rotationTolerance) {
+            print("no rotate needed", "");
+            return;
+        }
+        while (isRotating) {
+            updatePosition(); //VERY NESSCESSARY WHENEVER THE ROBOT IS MOVING
+
+            error = getErrorRot(targetPosDegrees);
+
+            if (Math.abs(error) <= rotationTolerance) {
+                isRotating = false;
+            } else if (Math.abs(error) <= rotationTolerance * 5) {
+                power /= 3;
+            }
+
+            direction = Math.signum(error);
+            setRotatePower(power, direction);
+        }
+        telemetry.addData("rotate end", "");
+        telemetry.update();
+        setRotatePower(0, 0);
+        currentHeading = targetPosDegrees; // updates global heading so we can realign after each movment
+
+    }
+
+    public void autoRotate(double targetPosDegrees, double power, boolean isEncoder) {
+        setToRotateRunMode();
+        autoRotate(targetPosDegrees, power);
+        resetEncoder();
+
+    }
+
 
     public void encoderRotate(double targetPosRadians, double power, boolean rotateClockwise) {
         // rotates to relative position

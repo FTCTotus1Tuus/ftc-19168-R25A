@@ -29,8 +29,21 @@ public class DarienOpMode extends LinearOpMode {
     public static double encoderResolution = 537.7; //no change unless we change motors
     public double wheelDiameter = 3.75; // inches
     public double constMult = (wheelDiameter * (Math.PI));
+    public static double rotationTolerance = 2; //in degrees
     public double inchesToEncoder = encoderResolution / constMult;
+    public static double CLOSED_CLAW = 0.96;
+    public static double OPEN_CLAW = 0.7;
     public static double PI = 3.1416;
+    public static double tilt_pgain = .01;
+    public static double tilt_igain = .0003;
+    public static double tilt_gain = 7;
+    public static double T2 = 1750;
+    public static double T1 = 10;
+    public static double slide_pgain = .005;
+    public static double slide_igain = .0004;
+    public static double slide_gain = 15;
+    public static double S2 = 3900;
+    public static double S1 = 0;
 
     // HARDWARE TUNING CONSTANTS
     public int encoderPos0, encoderPos1, encoderPos2, encoderPos3;
@@ -160,4 +173,5 @@ public class DarienOpMode extends LinearOpMode {
     public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
     }
+
 }

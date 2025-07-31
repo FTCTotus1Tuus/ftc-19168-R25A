@@ -8,17 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @Config
 public class NewDriverControlOpMode extends DarienOpModeTeleop {
     // tuning constants for gobilda 117 rpm motor
-    public static double tilt_pgain = .01;
-    public static double tilt_igain = .0003;
-    public static double tilt_gain = 7;
-    public static double T2 = 1750;
-    public static double T1 = 10;
+
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide
-    public static double slide_pgain = .005;
-    public static double slide_igain = .0004;
-    public static double slide_gain = 15;
-    public static double S2 = 3900;
-    public static double S1 = 0;
     private MotorHelper tiltMotorHelper;
     private MotorHelper slideMotorHelper;
 
@@ -48,7 +39,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                     S1,
                     S2,
                     gamepad2.right_stick_y,
-                    false
+                    true
             );
             slideMotor1.setPower(slideMotorPID[0]);
 
