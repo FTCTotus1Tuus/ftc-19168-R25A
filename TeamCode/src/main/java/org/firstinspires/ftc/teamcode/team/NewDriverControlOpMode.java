@@ -38,7 +38,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                     slide_gain,
                     S1,
                     S2,
-                    gamepad2.right_stick_y,
+                    -gamepad2.right_stick_y,
                     true
             );
             slideMotor1.setPower(slideMotorPID[0]);
@@ -51,7 +51,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                     tilt_gain,
                     T1,
                     T2,
-                    gamepad2.left_stick_y,
+                    -gamepad2.left_stick_y,
                     false
             );
             tiltMotor.setPower(tiltMotorPID[0]);

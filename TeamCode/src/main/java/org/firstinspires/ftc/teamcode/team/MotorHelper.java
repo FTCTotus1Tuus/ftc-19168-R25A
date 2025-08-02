@@ -25,7 +25,7 @@ public class MotorHelper {
     public double[] pid(DcMotor Motor, double pgain, double igain, double setpoint, double pdutyMin, double pdutyMax, double idutyMin, double idutyMax, double iduty, double powerMin, double powerMax, double gain, double bottomStop, double topStop, float Control, boolean isTelemetryShown) {
         double[] returnArray;
 
-        this.clampedsetpoint = clamp(setpoint - Control * gain, bottomStop, topStop);
+        this.clampedsetpoint = clamp(setpoint + Control * gain, bottomStop, topStop);
 
         this.pduty = clamp(pgain * (this.clampedsetpoint - Motor.getCurrentPosition()), pdutyMin, pdutyMax);
         this.iduty = clamp(igain * (this.clampedsetpoint - Motor.getCurrentPosition()) + iduty, idutyMin, idutyMax);
@@ -39,7 +39,7 @@ public class MotorHelper {
         if (isTelemetryShown) {
             telemetry.addData("Pduty: ", pduty);
             telemetry.addData("Iduty: ", iduty);
-            telemetry.addData("Motor Encoder: ", Motor.getCurrentPosition());
+            telemetry.addData("Motor Encoder " + Motor.getDeviceName() + ": ", Motor.getCurrentPosition());
             telemetry.addData("Set point: ", setpoint);
             telemetry.addData("Clamped Set Point: ", clampedsetpoint);
             telemetry.update();

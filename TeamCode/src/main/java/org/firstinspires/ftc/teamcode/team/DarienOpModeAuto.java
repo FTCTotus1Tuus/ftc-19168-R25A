@@ -26,8 +26,8 @@ public class DarienOpModeAuto extends DarienOpMode {
     public static double movement_pgain = 0.06;
     public static double distanceToSlowdown = 4; //Inches
     public static double slowdownPower = 0.35;
-    public double[] tiltMotorPID = {0, 0, 0, 0};
-    public double[] slideMotorPID = {0, 0, 0, 0};
+    //public double[] tiltMotorPID = {0, 0, 0, 0};
+    //public double[] slideMotorPID = {0, 0, 0, 0};
 
     public static double normalPower = 0.3;
     public static double verticalSlidePower = 1; //swapped to 1 from 0.8 needs testing
@@ -62,14 +62,14 @@ public class DarienOpModeAuto extends DarienOpMode {
 
     public double currentPosition = 0;
     public static double rotationEncoderConstant = 557;
-    public MotorHelper tiltMotorHelper;
-    public MotorHelper slideMotorHelper;
+    //public MotorHelper tiltMotorHelper;
+    //public MotorHelper slideMotorHelper;
 
     @Override
     public void initControls() {
         super.initControls();
-        tiltMotorHelper = new MotorHelper(telemetry);
-        slideMotorHelper = new MotorHelper(telemetry);
+        //tiltMotorHelper = new MotorHelper(telemetry);
+        //slideMotorHelper = new MotorHelper(telemetry);
         webcam1 = hardwareMap.get(WebcamName.class, "Webcam 1");
         // true = blue false = red
         imageProcess = new ImageProcess();
