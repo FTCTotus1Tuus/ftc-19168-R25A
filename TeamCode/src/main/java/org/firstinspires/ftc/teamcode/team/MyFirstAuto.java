@@ -43,7 +43,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
             sleep(100);
             tiltSetPoint = 956;
             slideSetPoint = 3416;
-            
+
             tiltMotorPID = tiltMotorHelper.pid(
                     tiltMotor,
                     tilt_pgain,
@@ -53,7 +53,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
                     T1,
                     T2,
                     tiltSetPoint,
-                    true
+                    false
             );
             tiltMotor.setPower(tiltMotorPID[0]);
             slideMotorPID = slideMotorHelper.pid(
@@ -65,7 +65,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
                     S1,
                     S2,
                     slideSetPoint,
-                    false
+                    true
             );
             slideMotor1.setPower(slideMotorPID[0]);
         }

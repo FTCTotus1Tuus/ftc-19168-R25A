@@ -34,16 +34,29 @@ public class DarienOpMode extends LinearOpMode {
     public static double CLOSED_CLAW = 0.96;
     public static double OPEN_CLAW = 0.7;
     public static double PI = 3.1416;
+    //public static double tilt_pgain = .01;    //***************************************************
+    //public static double tilt_igain = .0003;  //***************************************************
+    //public static double tilt_gain = 7;       //***************************************************
     public static double tilt_pgain = .01;
-    public static double tilt_igain = .0003;
-    public static double tilt_gain = 7;
-    public static double T2 = 1750;
+    public static double tilt_igain = .00001;
+    public static double tilt_gain = 18;
+    //public static double T2 = 1750; //***************************************************
+    //public static double T1 = 10;   //***************************************************
     public static double T1 = 10;
+    public static double T2 = 1750;
+    //public static double slide_pgain = .005;  //***************************************************
+    //public static double slide_igain = .0004; //***************************************************
+    //public static double slide_gain = 15;     //***************************************************
     public static double slide_pgain = .005;
     public static double slide_igain = .0004;
-    public static double slide_gain = 15;
-    public static double S2 = 3900;
+    public static double slide_gain = 35;
+    //public static double S1 = 0;    //***************************************************
+    //public static double S2 = 3900; //***************************************************
     public static double S1 = 0;
+    public static double S2 = 3900;
+    //this is for R25B
+    public static double slideDirection = -1;
+    public static double tiltDirection = 1;
 
     // HARDWARE TUNING CONSTANTS
     public int encoderPos0, encoderPos1, encoderPos2, encoderPos3;
@@ -77,8 +90,8 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor1.setDirection(DcMotor.Direction.FORWARD);
         omniMotor2.setDirection(DcMotor.Direction.FORWARD);
         omniMotor3.setDirection(DcMotor.Direction.REVERSE);
-        slideMotor1.setDirection(DcMotor.Direction.REVERSE);
-        tiltMotor.setDirection(DcMotor.Direction.FORWARD);
+        slideMotor1.setDirection(DcMotor.Direction.FORWARD);
+        tiltMotor.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();
