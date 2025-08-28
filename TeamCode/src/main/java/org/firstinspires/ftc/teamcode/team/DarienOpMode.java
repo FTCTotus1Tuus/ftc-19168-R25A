@@ -37,9 +37,10 @@ public class DarienOpMode extends LinearOpMode {
     //public static double tilt_pgain = .01;    //***************************************************
     //public static double tilt_igain = .0003;  //***************************************************
     //public static double tilt_gain = 7;       //***************************************************
-    public static double tilt_pgain = .01;
-    public static double tilt_igain = .00001;
-    public static double tilt_gain = 18;
+    public static double tilt_pgain = .005;
+    public static double tilt_pgain2 = .002;
+    public static double tilt_igain = .000005;
+    public static double tilt_gain = 10;
     //public static double T2 = 1750; //***************************************************
     //public static double T1 = 10;   //***************************************************
     public static double T1 = 10;
@@ -48,6 +49,7 @@ public class DarienOpMode extends LinearOpMode {
     //public static double slide_igain = .0004; //***************************************************
     //public static double slide_gain = 15;     //***************************************************
     public static double slide_pgain = .005;
+    public static double slide_pgain2 = .005;
     public static double slide_igain = .0004;
     public static double slide_gain = 35;
     //public static double S1 = 0;    //***************************************************
@@ -135,7 +137,7 @@ public class DarienOpMode extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(82, -100); //these are tuned for 7/23/2025 robot with length of 288mm and width of 366mm.
+        odo.setOffsets(-70, -112); //these are tuned for 7/23/2025 robot with length of 288mm and width of 366mm.
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either

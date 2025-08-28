@@ -47,6 +47,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
             tiltMotorPID = tiltMotorHelper.pid(
                     tiltMotor,
                     tilt_pgain,
+                    tilt_pgain2,
                     tilt_igain,
                     tiltMotorPID[2], -.5, 0.8, -0.2, 1, tiltMotorPID[1], -.5, .25,
                     tilt_gain,
@@ -59,6 +60,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
             slideMotorPID = slideMotorHelper.pid(
                     slideMotor1,
                     slide_pgain,
+                    slide_pgain2,
                     slide_igain,
                     slideMotorPID[2], -.7, .6, -.7, .6, slideMotorPID[1], -1, 1,
                     slide_gain,
