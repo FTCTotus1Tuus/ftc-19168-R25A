@@ -15,7 +15,9 @@ import org.opencv.imgproc.Imgproc;
 public class ImageProcess implements VisionProcessor {
     private Mat workingMat1 = new Mat(), workingMat2 = new Mat(), workingMatRed = new Mat(), workingMatYellow = new Mat();
     public static int minHueR = 0, minSaturationR = 40, minValueR = 0, maxHueR = 10, maxSaturationR = 260, maxValueR = 300,
-            minHueY = 15, minSaturationY = 245, minValueY = 110, maxHueY = 35, maxSaturationY = 255, maxValueY = 255, frameWidth, frameHeight;
+            minHueY = 15, minSaturationY = 245, minValueY = 110, maxHueY = 35, maxSaturationY = 255,
+            maxValueY = 255, frameWidth, frameHeight;
+
     private double redCount, yellowCount;
     private boolean lastResult;
 
