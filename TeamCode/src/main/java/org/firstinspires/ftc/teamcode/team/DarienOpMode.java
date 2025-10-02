@@ -137,7 +137,7 @@ public class DarienOpMode extends LinearOpMode {
         the tracking point the Y (strafe) odometry pod is. forward of center is a positive number,
         backwards is a negative number.
          */
-        odo.setOffsets(-70, -112); //these are tuned for 7/23/2025 robot with length of 288mm and width of 366mm.
+        odo.setOffsets(-70, -112); //these are tuned for Aug 2025 robot with length of 288mm and width of 366mm.
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either

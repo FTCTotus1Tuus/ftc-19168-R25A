@@ -6,13 +6,11 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 //import com.qualcomm.hardware.sparkfun.SparkFunOTOS;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
@@ -62,9 +60,9 @@ public class DarienOpModeAuto extends DarienOpMode {
     public double currentMovementPower = 0;
     public static double ProportionalCoefficient = 0.3;
 
-    public double currentHeading = 0;
+    public double currentHeadingDegrees = 0;
 
-    public double specimenWristUp = 0.48;
+    //public double specimenWristUp = 0.48;
 
     public double currentPosition = 0;
     public static double rotationEncoderConstant = 557;
@@ -104,34 +102,43 @@ public class DarienOpModeAuto extends DarienOpMode {
     }
 
     public void moveToPosition(double globalX, double globalY, double power) {
-        moveToPosition(globalX, globalY, currentHeading, power);
+        moveToPosition(globalX, globalY, currentHeadingDegrees, power);
     }
 
+    /**
+     * Moves the robot to a target robot-centric position using an odometry sensor, with positive X moving forward and positive Y strafing to the left.
+     *
+     * @param globalX Target X position on the field (positive = forward)
+     * @param globalY Target Y position on the field (positive = left)
+     * @param globalH Target robot heading in degrees.
+     * @param power   Target power value in the range -1 to 1
+     */
     public void moveToPosition(double globalX, double globalY, double globalH, double power) {
-        // uses optical sensor to move by setting robot motor power
-        // DOES NOT USE ENCODERS
+        // uses odometry sensor (not motor encoders) to move by setting robot motor power
 
-        updatePosition(); //VERY NESSCESARY WHENEVER THE ROBOT IS MOVING
+        updatePosition(); //VERY NECESSARY WHENEVER THE ROBOT IS MOVING
 
         movementStartTime = this.time;
 
         double errorX = globalX - getXPos();
         double errorY = globalY - getYPos();
-        double errorH = getErrorRot(globalH);
+        double errorH = getErrorRot(globalH); // degrees
 
         currentMovementPower = power;
         targetPosY = globalY;
         targetPosX = globalX;
         targetPosH = globalH;
 
-        double errorXp = (errorX * Math.cos(Math.toRadians(getRawHeading()))) + errorY * Math.sin(Math.toRadians(getRawHeading()));
-        double errorYp = (-errorX * Math.sin(Math.toRadians(getRawHeading()))) + errorY * Math.cos(Math.toRadians(getRawHeading()));
+        double headingRad = Math.toRadians((getRawHeading()));
+        double errorXp = (errorX * Math.cos(headingRad)) - (errorY * Math.sin(headingRad));
+        double errorYp = (errorX * Math.sin(headingRad)) + (errorY * Math.cos(headingRad));
 
         if (Math.abs(errorH) <= 5) {// attempts to make sure jitters happen less
+            // TODO: Evaluate if resetting the heading error (errorH) to zero is introducing a compounding heading drift.
             errorH = 0; // if error is within 5 degrees on either side we say we're good
         }
-
-        setPower(power, errorXp, errorYp, errorH); // add pid?
+        double errorHNormalized = errorH / 180.0; // Normalize the degree heading error into [-1,1] as a turn power command
+        setPower(power, errorXp, errorYp, errorHNormalized); // add pid?
 
     }
 
@@ -154,6 +161,25 @@ public class DarienOpModeAuto extends DarienOpMode {
 
         setRunMode();
         setPower(power, adjX, adjY, 0);
+    }
+
+    public void encoderRotate(double targetPosRadians, double power, boolean rotateClockwise) {
+        // rotates to relative position
+        resetEncoder();
+
+        int errorBig = (int) (targetPosRadians * rotationEncoderConstant);
+
+        omniMotor0.setTargetPosition(errorBig * (rotateClockwise ? 1 : -1));
+        omniMotor1.setTargetPosition(-errorBig * (rotateClockwise ? 1 : -1));
+        omniMotor2.setTargetPosition(errorBig * (rotateClockwise ? 1 : -1));
+        omniMotor3.setTargetPosition(-errorBig * (rotateClockwise ? 1 : -1));
+
+        setRunMode();
+
+        setRotateEncoderPower(power, rotateClockwise ? 1 : -1);
+
+        currentPosition = targetPosRadians;
+
     }
 
     public void autoRotate(double targetPosDegrees, double power) {
@@ -185,7 +211,7 @@ public class DarienOpModeAuto extends DarienOpMode {
         telemetry.addData("rotate end", "");
         telemetry.update();
         setRotatePower(0, 0);
-        currentHeading = targetPosDegrees; // updates global heading so we can realign after each movment
+        currentHeadingDegrees = targetPosDegrees; // updates global heading so we can realign after each movment
 
     }
 
@@ -195,66 +221,6 @@ public class DarienOpModeAuto extends DarienOpMode {
         resetEncoder();
 
     }
-
-
-    public void encoderRotate(double targetPosRadians, double power, boolean rotateClockwise) {
-        // rotates to relative position
-        resetEncoder();
-
-        int errorBig = (int) (targetPosRadians * rotationEncoderConstant);
-
-        omniMotor0.setTargetPosition(errorBig * (rotateClockwise ? 1 : -1));
-        omniMotor1.setTargetPosition(-errorBig * (rotateClockwise ? 1 : -1));
-        omniMotor2.setTargetPosition(errorBig * (rotateClockwise ? 1 : -1));
-        omniMotor3.setTargetPosition(-errorBig * (rotateClockwise ? 1 : -1));
-
-        setRunMode();
-
-        setRotateEncoderPower(power, rotateClockwise ? 1 : -1);
-
-        currentPosition = targetPosRadians;
-
-    }
-
-//    public void autoRotate(double targetPosDegrees, double power) {
-//        //direction counter clockwise is -1 clockwise is 1
-//
-//        double error = getErrorRot(targetPosDegrees);
-//        boolean isRotating = true;
-//        double direction = Math.signum(error);
-//        setRotatePower(power, direction);
-//
-//        if (Math.abs(error) <= rotationTolerance) {
-//            print("no rotate needed", "");
-//            return;
-//        }
-//        while (isRotating) {
-//            updatePosition(); //VERY NESSCESSARY WHENEVER THE ROBOT IS MOVING
-//
-//            error = getErrorRot(targetPosDegrees);
-//
-//            if (Math.abs(error) <= rotationTolerance) {
-//                isRotating = false;
-//            } else if (Math.abs(error) <= rotationTolerance * 5) {
-//                power /= 3;
-//            }
-//
-//            direction = Math.signum(error);
-//            setRotatePower(power, direction);
-//        }
-//        telemetry.addData("rotate end", "");
-//        telemetry.update();
-//        setRotatePower(0, 0);
-//        currentHeading = targetPosDegrees; // updates global heading so we can realign after each movment
-//
-//    }
-
-//    public void autoRotate(double targetPosDegrees, double power, boolean isEncoder) {
-//        setToRotateRunMode();
-//        autoRotate(targetPosDegrees, power);
-//        resetEncoder();
-//
-//    }
 
 
     public double sigmoid(double x) {
@@ -281,18 +247,29 @@ public class DarienOpModeAuto extends DarienOpMode {
         omniMotor3.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    public void setPower(double power, double adjX, double adjY, double adjH) {
+    /**
+     * Sets power to each holonomic wheel, assuming motor order 0 to 3 is a Z configuration (front-left, front-right, rear-left, rear-right).
+     *
+     * @param power Target motor power (-1 to 1)
+     * @param adjX  Target x position (positive = forward)
+     * @param adjY  Target y position (positive = left strafe)
+     * @param adjH  Target turn rate command (-1 to 1), where positive is CCW and negative is CW
+     * @return Scaled motor powers
+     */
+    public double[] setPower(double power, double adjX, double adjY, double adjH) {
 
         double[] motorPowers = scalePower(
-                (adjY + adjX - adjH * rotConst),
-                (adjY - adjX + adjH * rotConst),
-                (adjY - adjX - adjH * rotConst),
-                (adjY + adjX + adjH * rotConst), power);
+                (+adjX - adjY - adjH * rotConst),
+                (+adjX + adjY + adjH * rotConst),
+                (+adjX + adjY - adjH * rotConst),
+                (+adjX - adjY + adjH * rotConst), power);
 
         omniMotor0.setPower(relativePower(motorPowers[0]));
         omniMotor1.setPower(relativePower(motorPowers[1]));
         omniMotor2.setPower(relativePower(motorPowers[2]));
         omniMotor3.setPower(relativePower(motorPowers[3]));
+
+        return motorPowers;
     }
 
     public double[] scalePower(double motorPower0, double motorPower1, double motorPower2, double motorPower3, double power) {
@@ -347,8 +324,11 @@ public class DarienOpModeAuto extends DarienOpMode {
         double errorY = 0;
         double errorXp;
         double errorYp;
-        double errorH;
+        double errorH = 0; // degrees
+        double errorHNormalized = 0;
         double errorHrads;
+        double headingRad;
+        double[] motorPowers;
 
         if (errorBand == 0) {
             errorBand = acceptableXYError;
@@ -365,40 +345,44 @@ public class DarienOpModeAuto extends DarienOpMode {
         while (looping) {
             updatePosition(); // VERY NESSCESSARY WHENEVER WE ARE MOVING
 
-            telemetry.addData("heading", getRawHeading());
             telemetry.addData("x: ", errorX);
-            print("y: ", errorY);
+            telemetry.addData("y: ", errorY);
+            print("h (deg): ", getRawHeading());
             errorX = targetPosX - getXPos();
             errorY = targetPosY - getYPos();
             errorH = getErrorRot(targetPosH);
-            errorHrads = Math.toRadians(errorH) * 7;
+            errorHNormalized = errorH / 180.0; // Normalize the degree heading error into [-1,1] as a turn power command
+
+            errorHrads = Math.toRadians(errorH);
 
             if (Math.abs(errorH) <= 5) {// attempts to make sure jitters happen less
                 errorH = 0; // if error is within 5 degrees on either side we say we're good
             }
 
-            errorXp = (errorX * Math.cos(Math.toRadians(getRawHeading()))) + errorY * Math.sin(Math.toRadians(getRawHeading()));
-            errorYp = (-errorX * Math.sin(Math.toRadians(getRawHeading()))) + errorY * Math.cos(Math.toRadians(getRawHeading()));
+            headingRad = Math.toRadians((getRawHeading()));
+            errorXp = (errorX * Math.cos(headingRad)) - (errorY * Math.sin(headingRad));
+            errorYp = (errorX * Math.sin(headingRad)) + (errorY * Math.cos(headingRad));
 
 
             if (noPID) {
                 if (getHypotenuse(errorXp, errorYp) < distanceToSlowdown && !noSlowdown) {
-                    setPower(slowdownPower, errorXp, errorYp, errorHrads); // add pid?
+                    motorPowers = setPower(slowdownPower, errorXp, errorYp, errorHNormalized); // add pid?
                     telemetry.addData("slow speed - no pid", "");
                 } else {
-                    setPower(currentMovementPower, errorXp, errorYp, errorHrads); // add pid?
+                    //this code works 9/20/2025
+                    motorPowers = setPower(currentMovementPower, errorXp, errorYp, errorHNormalized); // add pid?
                     telemetry.addData("full speed - no pid", "");
                 }
             } else {
                 if (getHypotenuse(errorXp, errorYp) < distanceToSlowdown && !noSlowdown) {
-                    setPower(slowdownPower, errorXp, errorYp, errorHrads); // add pid?
+                    motorPowers = setPower(slowdownPower, errorXp, errorYp, errorHNormalized); // add pid?
                     telemetry.addData("final approach - pid", "");
                 } else {
 
                     movement_pduty = clamp(movement_pgain * Math.pow(getHypotenuse(errorXp, errorYp), 3 / 2), -1, 1);
                     movement_iduty = clamp(movement_igain * (getHypotenuse(errorXp, errorYp)) + movement_iduty, -.7, .7);
                     movement_power = clamp(movement_pduty + movement_iduty, -currentMovementPower, currentMovementPower);
-                    setPower(movement_power, errorXp, errorYp, errorHrads);
+                    motorPowers = setPower(movement_power, errorXp, errorYp, errorHNormalized);
                     telemetry.addData("current move power: ", movement_power);
                 }
             }
@@ -417,16 +401,24 @@ public class DarienOpModeAuto extends DarienOpMode {
             TelemetryPacket packet = new TelemetryPacket();
             packet.put("x pos", getXPos());
             packet.put("y pos", getYPos());
-            packet.put("rot pos", getRawHeading());
+            packet.put("h pos", getRawHeading());
+            packet.put("h errorH", errorH);
+            packet.put("h errorHNormalized", errorHNormalized);
+            packet.put("h odo", Math.toDegrees(odo.getHeading()));
             packet.put("x vel", velocity.getY(DistanceUnit.INCH));
             packet.put("y vel", velocity.getX(DistanceUnit.INCH));
+            packet.put("errorX", errorX);
+            packet.put("errorY", errorY);
+            packet.put("errorXp", errorXp);
+            packet.put("errorYp", errorYp);
+            packet.put("Motor powers", motorPowers);
 
             dashboard.sendTelemetryPacket(packet);
 
 
         }
 
-        currentHeading = getRawHeading();
+        currentHeadingDegrees = getRawHeading();
         setPower(0, 0, 0, 0);
 
         telemetry.addData("x pos: ", getXPos());
@@ -464,9 +456,15 @@ public class DarienOpModeAuto extends DarienOpMode {
         return getHypotenuse(errorX, errorY) * ProportionalCoefficient;
     }
 
+    /**
+     * Computes the smallest angular error (difference) between the robot’s current heading and a target heading, in degrees.
+     * It ensures the result is always in the range [-180°, 180°], which makes it easy to know whether you should turn clockwise (positive) or counterclockwise (negative).
+     *
+     * @param targetPosRot Target heading in degrees [-360, 360]
+     * @return Number of degrees to turn [-180, 180] to reach target heading (positive is clockwise)
+     */
     public double getErrorRot(double targetPosRot) {
-        // pos is clockwwise neg is counterclockwise
-        return ((targetPosRot - getRawHeading()) + 180) % 360 - 180;
+        return (((targetPosRot - getRawHeading()) + 180) % 360 + 360) % 360 - 180;
     }
 
     public void updatePosition() {
@@ -474,6 +472,11 @@ public class DarienOpModeAuto extends DarienOpMode {
         currentRobotPos = odo.getPosition();
     }
 
+    /**
+     * This gets the heading in degrees. Be aware that this normalizes the angle to be between -180 and 180 for DEGREES.
+     *
+     * @return number of degrees [-180, 180]
+     */
     public double getRawHeading() {
         return currentRobotPos.getHeading(AngleUnit.DEGREES);
     }

@@ -1,12 +1,9 @@
 package org.firstinspires.ftc.teamcode.team;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-
-import java.util.List;
-
+@Config
 @Autonomous(name = "MyFirstAuto", group = "State")
 public class MyFirstAuto extends DarienOpModeAuto {
 
@@ -16,13 +13,18 @@ public class MyFirstAuto extends DarienOpModeAuto {
     private double T2 = 1000;
     private float tiltSetPoint = 0;
     private float slideSetPoint = 0;
-
+    public static double targetX = 0;
+    public static double targetY = 0;
+    public static double targetHDegrees = 0;
+    public static boolean noPid = true;
+    public static boolean noSlowdown = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         initControls();
         waitForStart();
+        if (isStopRequested()) return;
 
         double[] tiltMotorPID = {0, 0, 0};
         double[] slideMotorPID = {0, 0, 0};
@@ -36,7 +38,11 @@ public class MyFirstAuto extends DarienOpModeAuto {
             // updatePosition is needed before reading the x,y positions from odometry.
             updatePosition();
 
-            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+            moveToPosition(targetX, targetY, targetHDegrees, .4);
+            waitForMotors(4, noPid, 0, noSlowdown);
+            setBreakpoint();
+
+            /*List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
             for (AprilTagDetection detection : currentDetections) {
                 switch (detection.id) {
@@ -60,17 +66,19 @@ public class MyFirstAuto extends DarienOpModeAuto {
 
             for (AprilTagDetection detection : currentDetections) {
                 if (detection.id == 23) {
-                    moveToPosition(5, 0, .2);
-                    waitForMotors();
+                    moveToPosition(targetX, targetY, .2);
+                    waitForMotors(4, false, 0, true);
                 } else if (detection.id == 24) {
-                    moveToPosition(0, 5, .2);
-                    waitForMotors();
+                    moveToPosition(targetX, targetY, .2);
+                    waitForMotors(4, false, 0, true);
                 }
+
             }
+             */
             telemetry.addData("x pos: ", getXPos());
             print("y pos: ", getYPos());
+
             /*
-            // end for() loop
             moveToPosition(5, 0, 0.2);
             waitForMotors();
             sleep(250);
@@ -78,6 +86,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
             moveToPosition(0, 0, 0.2);
             waitForMotors();
             sleep(250);
+
             moveToPosition(0, 10, 0.2);
             waitForMotors();
             sleep(250);
@@ -131,6 +140,7 @@ public class MyFirstAuto extends DarienOpModeAuto {
             );
             slideMotor1.setPower(slideMotorPID[0]);
             */
+            if (gamepad1.back) return;
         }
     }
 }
