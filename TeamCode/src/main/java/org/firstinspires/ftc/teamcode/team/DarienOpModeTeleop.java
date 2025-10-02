@@ -17,23 +17,15 @@ public class DarienOpModeTeleop extends DarienOpMode {
         telemetry.update(); // Send telemetry to the driver controller only here.
     }
 
-    public void runClaw() {
-        if (gamepad2.right_trigger > rtvoltage) {
-            //if right trigger is pressed, claw is opened depending on how much the trigger is pressed
-            claw.setPosition((OPEN_CLAW - CLOSED_CLAW) * gamepad2.right_trigger + CLOSED_CLAW);
 
-        } else {
-            //if right trigger is not pressed, claw is closed
-            claw.setPosition(CLOSED_CLAW);
-        }
-    }
+
 
 
     /**
      * If the GP1 left bumper is pressed, spin the boot wheels in if the joystick is pulled down or spin the boot wheels out if the joystick is pushed up.
      */
 
-    public void runSlideMotorSystem() {
+   /* public void runSlideMotorSystem() {
         telemetry.addData("y=", gamepad2.right_stick_y);
         telemetry.addData("encodervalue=", slideMotor1.getCurrentPosition());
 
@@ -56,11 +48,13 @@ public class DarienOpModeTeleop extends DarienOpMode {
         }
 
 
+
+
         //A: when right stick y set power to 1
         //B: when encoder reaches certain limit, slow down power
         //
     }
-
+*/
 
     /**
      * runMotorWithEncoderStops
