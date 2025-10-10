@@ -12,12 +12,23 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide
     public static double IntakeServoPosUp = 0.7;
     public static double IntakeServoPosDown = 0.2;
-    public static double TrayPos1Intake = 0;
-    public static double TrayPos2Intake = 0.885;
-    public static double TrayPos3Intake = 0.45;
-    public static double TrayPos1Score = 0.7;
-    public static double TrayPos2Score = 0.2;
-    public static double TrayPos3Score = 0;
+    public static double TrayPos1Intake = 0.4;
+    public static double TrayPos2Intake = 0;
+    public static double TrayPos3Intake = 0.8;
+    public static double TrayPos1Score = 1;
+    public static double TrayPos2Score = 0.6;
+    public static double TrayPos3Score = 0.2;
+    double IntakeServoPosition = 0;
+    double startTimeIntakeServo = 0;
+    boolean isIntakeServoMoving = false;
+
+    public double getIntakeServoPosition() {
+        return IntakeServoPosition;
+    }
+    public void setIntakeServoPosition(double position) {
+        IntakeServo.setPosition(position);
+        IntakeServoPosition = position;
+    }
 
     @Override
     public void runOpMode() {
@@ -36,27 +47,44 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                 ejectionMotorLeft.setPower(0);
                 ejectionMotorRight.setPower(0);
             }
+
+            // CONTROL: SPINNER
             if (gamepad2.left_bumper){
                 Spinner.setPower(1);
             } else {
                 Spinner.setPower(0);
             }
-            if (gamepad2.a){
-                IntakeServo.setPosition(IntakeServoPosUp);
+
+            // CONTROL: INTAKE
+            if (isIntakeServoMoving) {
+                // Continue moving the servo until the position is reached.
+                if (getIntakeServoPosition() < IntakeServoPosUp && getRuntime()-startTimeIntakeServo < 4) {
+                    setIntakeServoPosition(getIntakeServoPosition() + 0.005);
+                } else {
+                    isIntakeServoMoving = false;
+                }
             } else {
-                IntakeServo.setPosition(IntakeServoPosDown);
+                if (gamepad2.a) {
+                    // Start lifting the intake.
+                    startTimeIntakeServo = getRuntime();
+                    isIntakeServoMoving = true;
+                } else {
+                    IntakeServo.setPosition(IntakeServoPosDown);
+                }
             }
-            if (gamepad2.dpad_left && gamepad2.y){
+
+            // CONTROL: ROTATING TRAY
+            if (gamepad2.dpad_left){
                 Tray.setPosition(TrayPos1Intake);
-            } else if (gamepad2.dpad_left && gamepad2.x){
+            } else if (gamepad2.x){
                 Tray.setPosition(TrayPos1Score);
-            } else if (gamepad2.dpad_up && gamepad2.y){
+            } else if (gamepad2.dpad_up){
                 Tray.setPosition(TrayPos2Intake);
-            } else if (gamepad2.dpad_up && gamepad2.x){
+            } else if (gamepad2.y){
                 Tray.setPosition(TrayPos2Score);
-            } else if (gamepad2.dpad_right && gamepad2.y){
+            } else if (gamepad2.dpad_right){
                 Tray.setPosition(TrayPos3Intake);
-            } else if (gamepad2.dpad_right && gamepad2.x){
+            } else if (gamepad2.b){
                 Tray.setPosition(TrayPos3Score);
             }
 
