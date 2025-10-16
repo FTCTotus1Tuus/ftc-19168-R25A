@@ -8,7 +8,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
@@ -22,11 +22,12 @@ public class DarienOpMode extends LinearOpMode {
    // public DcMotor slideMotor1;
    // public DcMotor tiltMotor;
    // public Servo claw;
-    public Servo Tray;
+    public Servo TrayServo;
     public CRServo Spinner;
     public Servo IntakeServo;
     public DcMotor ejectionMotorRight;
     public DcMotor ejectionMotorLeft;
+    public NormalizedColorSensor intakeColorSensor;
 
     //    public IMU imu;
    // public GoBildaPinpointDriver odo;
@@ -86,9 +87,11 @@ public class DarienOpMode extends LinearOpMode {
 
         // INITIALIZE SERVOS
         //claw = hardwareMap.get(Servo.class, "claw");
-        Tray = hardwareMap.get(Servo.class, "Tray");
+        TrayServo = hardwareMap.get(Servo.class, "Tray");
         Spinner = hardwareMap.get(CRServo.class, "Spinner");
         IntakeServo = hardwareMap.get(Servo.class, "intakeServo");
+        // INITIALIZE SENSORS
+        intakeColorSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeColorSensor");
         // INITIALIZE MOTORS
         omniMotor0 = initializeMotor("omniMotor0");
         omniMotor1 = initializeMotor("omniMotor1");

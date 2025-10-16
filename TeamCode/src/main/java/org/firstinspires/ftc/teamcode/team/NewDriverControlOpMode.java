@@ -1,8 +1,14 @@
 package org.firstinspires.ftc.teamcode.team;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
 @TeleOp//(name="DC", group="DriverControl")
@@ -13,16 +19,19 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide
     public static double INTAKE_SERVO_POS_UP = 0.67;
     public static double INTAKE_SERVO_POS_DOWN = 0.21;
-    public static double TRAY_POS_1_INTAKE = 0.4;
+    public static double TRAY_POS_1_INTAKE = 0.35;
     public static double TRAY_POS_2_INTAKE = 0;
     public static double TRAY_POS_3_INTAKE = 0.8;
     public static double TRAY_POS_1_SCORE = 1;
     public static double TRAY_POS_2_SCORE = 0.6;
-    public static double TRAY_POS_3_SCORE = 0.2;
+    public static double TRAY_POS_3_SCORE = 0.13;
     double IntakeServoPosition = 0;
     double startTimeIntakeServo = 0;
     boolean isIntakeServoMoving = false;
-
+    public double currentTrayPosition ;
+    public static double INTAKE_DISTANCE = 5;//in CM
+    TelemetryPacket tp;
+    FtcDashboard dash;
 
     public double getIntakeServoPosition() {
         return IntakeServoPosition;
@@ -36,32 +45,62 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
         double currentPos;
         double startTime = getRuntime();
         double currentTime = startTime;
+        //double Last_Time = currentTime;
+        double ActualPos = 0;
         while (currentTime - startTime < endDuration) {
-            currentPos = ((endPos - startPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + startPos;
+            if(endPos > startPos){
+                // rotate tray clockwise
+                currentPos = ((endPos - startPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + startPos;
+            } else {
+                // rotate tray counterclockwise
+                currentPos = ((startPos - endPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + endPos;
+            }
             servo.setPosition(currentPos);
+            /*
+            if (currentTime - Last_Time >= 0.240 ){
+                servo.setPosition(currentPos);
+                ActualPos = currentPos;
+                Last_Time = currentTime;
+            }
+
+             */
             telemetry.addData("currentPos:", currentPos);
             telemetry.addData("currentTime:", currentTime);
+            telemetry.update();
+            tp.put("currentServo",currentPos);
+            tp.put("currentTime",currentTime);
+            //tp.put("lastTime",Last_Time);
+            tp.put("ActPos",ActualPos);
 
-            if (currentPos >= endPos){
-                sleep(1000);
-                break;
+            dash.sendTelemetryPacket(tp);
+
+            if (currentPos >= endPos) {
+                //sleep(1000);
+                return;
             }
             currentTime = getRuntime();
 
         }
-        sleep(3000);
+        //sleep(3000);
     }
 
 
     @Override
     public void runOpMode() {
+        float gain = 2;
         initControls();
+        // TODO: Add slowdown for tray init to POS 1 INTAKE
+        tp = new TelemetryPacket();
+        dash = FtcDashboard.getInstance();
+        double startTimeColor = getRuntime();
         waitForStart();
         //Start
-
+        TrayServo.setPosition(TRAY_POS_1_INTAKE);
+        currentTrayPosition=TRAY_POS_1_INTAKE;
         while (this.opModeIsActive()) {
             //pollSensors();
             runDriveSystem();
+            NormalizedRGBA colors = intakeColorSensor.getNormalizedColors();
           //assigning the ejectionmotorleft/right controls
             if (gamepad2.right_bumper){
                 ejectionMotorLeft.setPower(1);
@@ -84,6 +123,28 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             // CONTROL: INTAKE
             //classify the function
             //when g2.a button is pressed intake servo goes up in increments in relation to the time
+            // Update the gain value if either of the A or B gamepad buttons is being held
+            if (gamepad1.a) {
+                // Only increase the gain by a small amount, since this loop will occur multiple times per second.
+                gain += 0.005;
+            } else if (gamepad1.b && gain > 1) {
+                // A gain of less than 1 will make the values smaller, which is not helpful.
+                gain -= 0.005;
+            }
+            telemetry.addData("Gain", gain);
+            telemetry.addLine()
+                    .addData("Red", "%.3f", colors.red)
+                    .addData("Green", "%.3f", colors.green)
+                    .addData("Blue", "%.3f", colors.blue);
+            if (intakeColorSensor instanceof DistanceSensor) {
+                telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
+                if (((DistanceSensor)intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime()-startTimeColor) >= 1){
+                    startTimeColor = getRuntime();
+                    servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1);
+                }
+            }
+            telemetry.update();
+
             if (gamepad2.a){
                 servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1);
             } else {
@@ -109,19 +170,30 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             */
             // CONTROL: ROTATING TRAY
             if (gamepad2.dpad_left){
-                Tray.setPosition(TRAY_POS_1_INTAKE);
+                //Tray.setPosition(TRAY_POS_1_INTAKE);
+                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_1_INTAKE;
             } else if (gamepad2.x){
-                Tray.setPosition(TRAY_POS_1_SCORE);
+                //Tray.setPosition(TRAY_POS_1_SCORE);
+                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_1_SCORE;
             } else if (gamepad2.dpad_up){
-                Tray.setPosition(TRAY_POS_2_INTAKE);
+                //Tray.setPosition(TRAY_POS_2_INTAKE);
+                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_2_INTAKE;
             } else if (gamepad2.y){
-                Tray.setPosition(TRAY_POS_2_SCORE);
+                //Tray.setPosition(TRAY_POS_2_SCORE);
+                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_2_SCORE;
             } else if (gamepad2.dpad_right){
-                Tray.setPosition(TRAY_POS_3_INTAKE);
+                //Tray.setPosition(TRAY_POS_3_INTAKE);
+                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_3_INTAKE;
             } else if (gamepad2.b){
-                Tray.setPosition(TRAY_POS_3_SCORE);
+                //Tray.setPosition(TRAY_POS_3_SCORE);
+                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 2);
+                currentTrayPosition = TRAY_POS_3_SCORE;
             }
-
         }
     }
 }
