@@ -23,7 +23,8 @@ public class DarienOpMode extends LinearOpMode {
    // public DcMotor tiltMotor;
    // public Servo claw;
     public Servo TrayServo;
-    public CRServo Spinner;
+    public Servo Elevator;
+    public Servo Feeder;
     public Servo IntakeServo;
     public DcMotor ejectionMotorRight;
     public DcMotor ejectionMotorLeft;
@@ -38,34 +39,8 @@ public class DarienOpMode extends LinearOpMode {
     public double constMult = (wheelDiameter * (Math.PI));
     public static double rotationTolerance = 2; //in degrees
     public double inchesToEncoder = encoderResolution / constMult;
-    public static double CLOSED_CLAW = 0.96;
-    public static double OPEN_CLAW = 0.7;
     public static double PI = 3.1416;
-    //public static double tilt_pgain = .01;    //***************************************************
-    //public static double tilt_igain = .0003;  //***************************************************
-    //public static double tilt_gain = 7;       //***************************************************
-    public static double tilt_pgain = .005;
-    public static double tilt_pgain2 = .002;
-    public static double tilt_igain = .000005;
-    public static double tilt_gain = 10;
-    //public static double T2 = 1750; //***************************************************
-    //public static double T1 = 10;   //***************************************************
-    public static double T1 = 10;
-    public static double T2 = 1750;
-    //public static double slide_pgain = .005;  //***************************************************
-    //public static double slide_igain = .0004; //***************************************************
-    //public static double slide_gain = 15;     //***************************************************
-    public static double slide_pgain = .005;
-    public static double slide_pgain2 = .005;
-    public static double slide_igain = .0004;
-    public static double slide_gain = 35;
-    //public static double S1 = 0;    //***************************************************
-    //public static double S2 = 3900; //***************************************************
-    public static double S1 = 0;
-    public static double S2 = 3900;
-    //this is for R25B
-    public static double slideDirection = -1;
-    public static double tiltDirection = 1;
+
 
     // HARDWARE TUNING CONSTANTS
     public int encoderPos0, encoderPos1, encoderPos2, encoderPos3;
@@ -88,8 +63,9 @@ public class DarienOpMode extends LinearOpMode {
         // INITIALIZE SERVOS
         //claw = hardwareMap.get(Servo.class, "claw");
         TrayServo = hardwareMap.get(Servo.class, "Tray");
-        Spinner = hardwareMap.get(CRServo.class, "Spinner");
+        Elevator = hardwareMap.get(Servo.class, "Elevator");
         IntakeServo = hardwareMap.get(Servo.class, "intakeServo");
+        Feeder = hardwareMap.get(Servo.class, "Feeder");
         // INITIALIZE SENSORS
         intakeColorSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeColorSensor");
         // INITIALIZE MOTORS
@@ -99,15 +75,11 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor3 = initializeMotor("omniMotor3");
         ejectionMotorRight = initializeMotor("ejectionMotorRight");
         ejectionMotorLeft = initializeMotor("ejectionMotorLeft");
-        //slideMotor1 = initializeMotor("slideMotor1");
-        //tiltMotor = initializeMotor("tiltMotor");
 
         omniMotor0.setDirection(DcMotor.Direction.FORWARD);
         omniMotor1.setDirection(DcMotor.Direction.REVERSE);
         omniMotor2.setDirection(DcMotor.Direction.REVERSE);
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
-        //slideMotor1.setDirection(DcMotor.Direction.FORWARD);
-        //tiltMotor.setDirection(DcMotor.Direction.REVERSE);
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();

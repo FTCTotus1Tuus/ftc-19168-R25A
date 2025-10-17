@@ -30,6 +30,10 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     boolean isIntakeServoMoving = false;
     public double currentTrayPosition ;
     public static double INTAKE_DISTANCE = 5;//in CM
+    public static double ELEVATOR_POS_UP = 0.87;
+    public static double ELEVATOR_POS_DOWN = 0.5;
+    public static double FEEDER_POS_UP = .9;
+    public static double FEEDER_POS_DOWN = .45;
     TelemetryPacket tp;
     FtcDashboard dash;
 
@@ -95,31 +99,35 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
         double startTimeColor = getRuntime();
         waitForStart();
         //Start
-        TrayServo.setPosition(TRAY_POS_1_INTAKE);
-        currentTrayPosition=TRAY_POS_1_INTAKE;
         while (this.opModeIsActive()) {
             //pollSensors();
             runDriveSystem();
             NormalizedRGBA colors = intakeColorSensor.getNormalizedColors();
           //assigning the ejectionmotorleft/right controls
-            if (gamepad2.right_bumper){
+            if (gamepad2.right_trigger > 0.05){
                 ejectionMotorLeft.setPower(1);
                 ejectionMotorRight.setPower(-1);
             } else {
                 ejectionMotorLeft.setPower(0);
                 ejectionMotorRight.setPower(0);
             }
-
-            /* TODO: DISABLE SPINNER UNTIL WE SWITCH IT TO A POSITIONAL SERVO
-            // CONTROL: SPINNER
-            if (gamepad2.left_bumper){
-                Spinner.setPower(1);
-            } else {
-                Spinner.setPower(0);
+            //CONTROL: TRAYINIT
+            if (gamepad2.start) {
+                servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1);
             }
 
-             */
-
+            //CONTROL: ELEVATOR
+            if (gamepad2.left_bumper){
+                Elevator.setPosition(ELEVATOR_POS_UP);
+            } else {
+                Elevator.setPosition(ELEVATOR_POS_DOWN);
+            }
+            //CONTROL: FEEDER
+            if (gamepad2.right_bumper){
+                Feeder.setPosition(FEEDER_POS_UP);
+            } else {
+                Feeder.setPosition(FEEDER_POS_DOWN);
+            }
             // CONTROL: INTAKE
             //classify the function
             //when g2.a button is pressed intake servo goes up in increments in relation to the time
@@ -171,29 +179,57 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             // CONTROL: ROTATING TRAY
             if (gamepad2.dpad_left){
                 //Tray.setPosition(TRAY_POS_1_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_1_INTAKE;
             } else if (gamepad2.x){
                 //Tray.setPosition(TRAY_POS_1_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_1_SCORE;
             } else if (gamepad2.dpad_up){
                 //Tray.setPosition(TRAY_POS_2_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_2_INTAKE;
             } else if (gamepad2.y){
                 //Tray.setPosition(TRAY_POS_2_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_2_SCORE;
             } else if (gamepad2.dpad_right){
                 //Tray.setPosition(TRAY_POS_3_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_3_INTAKE;
             } else if (gamepad2.b){
                 //Tray.setPosition(TRAY_POS_3_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 2);
+                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1);
                 currentTrayPosition = TRAY_POS_3_SCORE;
             }
+            //MACRO: APRILTAG 21
+            /*
+            tray.setpostion(TRAY_POS_1_SCORE)
+            if (gamepad.2(button combo)){
+                servoincremental(TRAY_POS_2_SCORE)
+                Elevator.setposition(ElevatorUp)
+                ejectiomotorleft+right.setpower(1)
+                Feeder.setposition(feederup)
+                feeder.setposition(down)
+                elevation.setposition(down)
+                ejectionmotorleft+right.setpower(0)
+                servoincermental(trayposition3score)
+                Elevator.setposition(ElevatorUp)
+                ejectiomotorleft+right.setpower(1)
+                Feeder.setposition(feederup)
+                feeder.setposition(down)
+                elevation.setposition(down)
+                ejectionmotorleft+right.setpower(0)
+                servoincremental(Traypos1score)
+                Elevator.setposition(ElevatorUp)
+                ejectiomotorleft+right.setpower(1)
+                Feeder.setposition(feederup)
+                feeder.setposition(down)
+                elevation.setposition(down)
+                ejectionmotorleft+right.setpower(0)
+            }
+             */
+
         }
     }
 }
