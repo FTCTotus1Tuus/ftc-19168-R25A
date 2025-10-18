@@ -17,20 +17,21 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
     // tuning constants for gobilda 117 rpm motor
 
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide
-    public static double INTAKE_SERVO_POS_UP = 0.67;
+    public static double INTAKE_SERVO_POS_UP = 0.75;
     public static double INTAKE_SERVO_POS_DOWN = 0.21;
-    public static double TRAY_POS_1_INTAKE = 0.35;
-    public static double TRAY_POS_2_INTAKE = 0;
-    public static double TRAY_POS_3_INTAKE = 0.8;
-    public static double TRAY_POS_1_SCORE = 1;
-    public static double TRAY_POS_2_SCORE = 0.6;
-    public static double TRAY_POS_3_SCORE = 0.13;
+    public static double TRAY_POS_1_INTAKE = 0.23;
+    public static double TRAY_POS_2_INTAKE = 0.8;
+    public static double TRAY_POS_3_INTAKE = 0.54;
+    public static double TRAY_POS_1_SCORE = .67;
+    public static double TRAY_POS_2_SCORE = 0.38;
+    public static double TRAY_POS_3_SCORE = 0.08;
     double IntakeServoPosition = 0;
     double startTimeIntakeServo = 0;
     boolean isIntakeServoMoving = false;
     public double currentTrayPosition ;
     public static double INTAKE_DISTANCE = 5;//in CM
-    public static double ELEVATOR_POS_UP = 0.87;
+    public static double INTAKE_TIME = 1;
+    public static double ELEVATOR_POS_UP = 0.75;
     public static double ELEVATOR_POS_DOWN = 0.5;
     public static double FEEDER_POS_UP = .9;
     public static double FEEDER_POS_DOWN = .45;
@@ -44,7 +45,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
         IntakeServo.setPosition(position);
         IntakeServoPosition = position;
     }
-    public void servoIncremental(Servo servo, double endPos, double startPos, double endDuration) {
+    public void servoIncremental(Servo servo, double endPos, double startPos, double endDuration, double divisor) {
         //calculate how many increments it will take to reach to position in the target time
         double currentPos;
         double startTime = getRuntime();
@@ -59,7 +60,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                 // rotate tray counterclockwise
                 currentPos = ((startPos - endPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + endPos;
             }
-            servo.setPosition(currentPos);
+            servo.setPosition(currentPos/divisor);
             /*
             if (currentTime - Last_Time >= 0.240 ){
                 servo.setPosition(currentPos);
@@ -113,7 +114,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             }
             //CONTROL: TRAYINIT
             if (gamepad2.start) {
-                servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1);
+                servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 1);
             }
 
             //CONTROL: ELEVATOR
@@ -148,13 +149,13 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
                 telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
                 if (((DistanceSensor)intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime()-startTimeColor) >= 1){
                     startTimeColor = getRuntime();
-                    servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1);
+                    servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1,1);
                 }
             }
             telemetry.update();
 
             if (gamepad2.a){
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1);
+                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_TIME,1);
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
@@ -179,27 +180,27 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             // CONTROL: ROTATING TRAY
             if (gamepad2.dpad_left){
                 //Tray.setPosition(TRAY_POS_1_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_1_INTAKE;
             } else if (gamepad2.x){
                 //Tray.setPosition(TRAY_POS_1_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_1_SCORE;
             } else if (gamepad2.dpad_up){
                 //Tray.setPosition(TRAY_POS_2_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_2_INTAKE;
             } else if (gamepad2.y){
                 //Tray.setPosition(TRAY_POS_2_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_2_SCORE;
             } else if (gamepad2.dpad_right){
                 //Tray.setPosition(TRAY_POS_3_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_3_INTAKE;
             } else if (gamepad2.b){
                 //Tray.setPosition(TRAY_POS_3_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1);
+                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1,4);
                 currentTrayPosition = TRAY_POS_3_SCORE;
             }
             //MACRO: APRILTAG 21
