@@ -57,7 +57,7 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             }
             //CONTROL: EJECTIONMOTOR BACKWARDS
             if (gamepad2.left_trigger > 0.05) {
-                ejectionMotorRight.setPower(-.5);
+                ejectionMotorRight.setPower(.5);
                 ejectionMotorLeft.setPower(-.5);
             }
 
