@@ -116,12 +116,11 @@ public class DarienOpModeTeleop extends DarienOpMode {
         double wheel1 = clamp(direction[0] + direction[1] - rotation, -1, 1);
         double wheel2 = clamp(-direction[0] + -direction[1] - rotation, -1, 1);
         double wheel3 = clamp(direction[0] + -direction[1] + rotation, -1, 1);
-//        if (turboBoost) {
-//            divBy = turboDivBy;
-//        } else {
-//            divBy = regularDivBy;
-//
-//        }
+        if (turboBoost) {
+            divBy = turboDivBy;
+        } else {
+            divBy = regularDivBy;
+        }
 
         divBy = (gamepad1.left_trigger / 2) + 0.5;
         telemetry.addData("", wheel0 * divBy);

@@ -4,7 +4,9 @@
 
 package org.firstinspires.ftc.teamcode.team;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,7 +15,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
-
+    // telemetry
+    TelemetryPacket tp;
+    FtcDashboard dash;
     // HARDWARE COMPONENTS
     public DcMotor omniMotor0; // left front
     public DcMotor omniMotor1; // right front
@@ -47,7 +51,26 @@ public class DarienOpMode extends LinearOpMode {
     public int encoderPos;
     public double regularDivBy = 2;
     public double turboDivBy = 1;
-    public boolean turboBoost;
+    public boolean turboBoost = false;
+
+    public static double INTAKE_SERVO_POS_UP = 0.75;
+    public static double INTAKE_SERVO_POS_DOWN = 0.21;
+    public static double TRAY_POS_1_INTAKE = 0.23;
+    public static double TRAY_POS_2_INTAKE = 0.8;
+    public static double TRAY_POS_3_INTAKE = 0.54;
+    public static double TRAY_POS_1_SCORE = .67;
+    public static double TRAY_POS_2_SCORE = 0.38;
+    public static double TRAY_POS_3_SCORE = 0.08;
+    double IntakeServoPosition = 0;
+    double startTimeIntakeServo = 0;
+    boolean isIntakeServoMoving = false;
+    public double currentTrayPosition;
+    public static double INTAKE_DISTANCE = 5;//in CM
+    public static double INTAKE_TIME = 1;
+    public static double ELEVATOR_POS_UP = 0.9;
+    public static double ELEVATOR_POS_DOWN = 0.5;
+    public static double FEEDER_POS_UP = .9;
+    public static double FEEDER_POS_DOWN = .45;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -107,6 +130,50 @@ public class DarienOpMode extends LinearOpMode {
         DcMotor motor = hardwareMap.get(DcMotor.class, name);
         motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         return motor;
+    }
+
+    public void servoIncremental(Servo servo, double endPos, double startPos, double endDuration, double divisor) {
+        //calculate how many increments it will take to reach to position in the target time
+        double currentPos;
+        double startTime = getRuntime();
+        double currentTime = startTime;
+        //double Last_Time = currentTime;
+        double ActualPos = 0;
+        while (currentTime - startTime < endDuration) {
+            if(endPos > startPos){
+                // rotate tray clockwise
+                currentPos = ((endPos - startPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + startPos;
+            } else {
+                // rotate tray counterclockwise
+                currentPos = ((startPos - endPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + endPos;
+            }
+            servo.setPosition(currentPos/divisor);
+            /*
+            if (currentTime - Last_Time >= 0.240 ){
+                servo.setPosition(currentPos);
+                ActualPos = currentPos;
+                Last_Time = currentTime;
+            }
+
+             */
+            telemetry.addData("currentPos:", currentPos);
+            telemetry.addData("currentTime:", currentTime);
+            telemetry.update();
+            tp.put("currentServo",currentPos);
+            tp.put("currentTime",currentTime);
+            //tp.put("lastTime",Last_Time);
+            tp.put("ActPos",ActualPos);
+
+            dash.sendTelemetryPacket(tp);
+
+            if (currentPos >= endPos) {
+                //sleep(1000);
+                return;
+            }
+            currentTime = getRuntime();
+
+        }
+        //sleep(3000);
     }
 
 
