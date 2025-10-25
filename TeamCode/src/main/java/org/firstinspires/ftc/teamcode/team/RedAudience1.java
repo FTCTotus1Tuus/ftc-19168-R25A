@@ -12,6 +12,12 @@ public class RedAudience1 extends DarienOpModeAuto {
 
         initControls();
         waitForStart();
+        if (isStopRequested()) return;
+
+        Elevator.setPosition(ELEVATOR_POS_DOWN);
+        Feeder.setPosition(FEEDER_POS_DOWN);
+        servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1,4);
+        currentTrayPosition = TRAY_POS_2_SCORE;
 
         telemetry.addData("omnimotor 0: ", omniMotor0.getCurrentPosition());
         telemetry.addData("omnimotor 1: ", omniMotor1.getCurrentPosition());
@@ -19,36 +25,69 @@ public class RedAudience1 extends DarienOpModeAuto {
         print("omnimotor 3: ", omniMotor3.getCurrentPosition());
 
         //move to the desired position
-        setBreakpoint();
-        moveXY(10, 0, .3);
+        sleep(250);
+        moveXY(70, 0, .3);
+        TrayServo.setPosition(TRAY_POS_2_SCORE);
         waitForMotors(true);
-        setBreakpoint();
-        //encoderRotate(Math.toRadians(45), .5, true);
-        /*
-        TrayServo.setPosition(TRAY_POS_1_SCORE);
-        servoIncremental(TrayServo, TRAY_POS_2_SCORE, TRAY_POS_1_SCORE, .5, 1);
+        encoderRotate(Math.toRadians(50), .5, true);
+        waitForMotors(true);
+
+        //shoot aritfact 1
         Elevator.setPosition(ELEVATOR_POS_UP);
-        shotgun(ejectionMotor1, ejectionMotor2);
-        Feeder.setposition(feederup);
-        feeder.setposition(down);
-        elevation.setposition(down);
-        ejectionmotorleft+right.setpower(0);
-        servoincermental(trayposition3score);
-        Elevator.setposition(ElevatorUp);
-        ejectiomotorleft+right.setpower(1);
-        Feeder.setposition(feederup);
-        feeder.setposition(down);
-        elevation.setposition(down);
-        ejectionmotorleft+right.setpower(0);
-        servoincremental(Traypos1score);
-        Elevator.setposition(ElevatorUp);
-        ejectiomotorleft+right.setpower(1);
-        Feeder.setposition(feederup);
-        feeder.setposition(down);
-        elevation.setposition(down);
-        ejectionmotorleft+right.setpower(0);
+        sleep(100);
+        shotGun(SHOT_GUN_POWER_DOWN, .5);
+        //start spinning down
+        sleep(500);
+        shotGun(SHOT_GUN_POWER_UP, 1.5);
+        sleep(400);
+        //start spinning up
+        Feeder.setPosition(FEEDER_POS_UP);
+        //move feeder up while spinner is still spinning
+        sleep(1500);
+        shotGunStop();
+        //stop spinning
+        Feeder.setPosition(FEEDER_POS_DOWN);
+        Elevator.setPosition(ELEVATOR_POS_DOWN);
+
+        //shoot artifact 2
+        /*
+        servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1,4);
+        currentTrayPosition = TRAY_POS_3_SCORE;
+        Elevator.setPosition(ELEVATOR_POS_UP);
+        sleep(100);
+        shotGun(SHOT_GUN_POWER_DOWN, .5);
+        //start spinning down
+        sleep(500);
+        shotGun(SHOT_GUN_POWER_UP, 1.5);
+        sleep(400);
+        //start spinning up
+        Feeder.setPosition(FEEDER_POS_UP);
+        //move feeder up while spinner is still spinning
+        sleep(1500);
+        shotGunStop();
+        //stop spinning
+        Feeder.setPosition(FEEDER_POS_DOWN);
+        Elevator.setPosition(ELEVATOR_POS_DOWN);
+
+        //shoot artifact 3
+        servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1,4);
+        currentTrayPosition = TRAY_POS_1_SCORE;
+        Elevator.setPosition(ELEVATOR_POS_UP);
+        sleep(100);
+        shotGun(SHOT_GUN_POWER_DOWN, .5);
+        //start spinning down
+        sleep(500);
+        shotGun(SHOT_GUN_POWER_UP, 1.5);
+        sleep(400);
+        //start spinning up
+        Feeder.setPosition(FEEDER_POS_UP);
+        //move feeder up while spinner is still spinning
+        sleep(1500);
+        shotGunStop();
+        //stop spinning
+        Feeder.setPosition(FEEDER_POS_DOWN);
+        Elevator.setPosition(ELEVATOR_POS_DOWN);
 
          */
-
     }
 }

@@ -83,6 +83,10 @@ public class DarienOpMode extends LinearOpMode {
         // Initialize 2 Deadwheel odometry
        // configure2DeadWheel();
 
+        //TELEMETRY
+        tp = new TelemetryPacket();
+        dash = FtcDashboard.getInstance();
+
         // INITIALIZE SERVOS
         //claw = hardwareMap.get(Servo.class, "claw");
         TrayServo = hardwareMap.get(Servo.class, "Tray");
