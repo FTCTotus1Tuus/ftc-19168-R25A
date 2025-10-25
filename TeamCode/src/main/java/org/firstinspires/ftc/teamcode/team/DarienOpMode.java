@@ -84,6 +84,7 @@ public class DarienOpMode extends LinearOpMode {
        // configure2DeadWheel();
 
         //TELEMETRY
+        // TODO: Put a flag to turn on/off ftc dashboard. We don't want that to run during matches.
         tp = new TelemetryPacket();
         dash = FtcDashboard.getInstance();
 

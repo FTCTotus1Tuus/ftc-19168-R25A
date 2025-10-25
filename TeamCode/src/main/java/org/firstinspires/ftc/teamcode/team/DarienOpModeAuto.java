@@ -1,10 +1,7 @@
 package org.firstinspires.ftc.teamcode.team;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -43,8 +40,6 @@ public class DarienOpModeAuto extends DarienOpMode {
 
     public Pose2D currentRobotPos;
 
-    FtcDashboard dashboard;
-
 
     //encoder movement targets
     public double targetPosX = 0;
@@ -70,9 +65,6 @@ public class DarienOpModeAuto extends DarienOpMode {
         omniMotor3.setDirection(DcMotor.Direction.REVERSE);
 
         //  odo.resetPosAndIMU();
-
-        dashboard = FtcDashboard.getInstance();
-
         resetEncoder();
     }
 
@@ -133,20 +125,9 @@ public class DarienOpModeAuto extends DarienOpMode {
         setRunMode();
         setPower(power, adjX, adjY, 0);
     }
-    public void shotGun(double power, double seconds) {
+    public void shotGun(double power) {
         ejectionMotorLeft.setPower(power);
         ejectionMotorRight.setPower(-power);
-        /*double startTime = getRuntime();
-        double currentTime = startTime;
-        while (currentTime - startTime < seconds) {
-            leftMotor.setPower(power);
-            rightMotor.setPower(-power);
-            currentTime = getRuntime();
-        }
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-
-         */
     }
 
     public void shotGunStop() {
