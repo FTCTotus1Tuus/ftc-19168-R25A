@@ -21,9 +21,11 @@ public class RedGoalSide1 extends DarienOpModeAuto {
         currentTrayPosition = TRAY_POS_2_SCORE;
 
         //move backwards to read obelisk
-        moveXY(-12, 0, .5);
+        moveXY(-26, 0, .25);
         waitForMotors(true);
-        encoderRotate(Math.toRadians(45),.5,true);
+        //sleep so cam can read apriltag
+        sleep(2000);
+        encoderRotate(Math.toRadians(65),.5,true);
         waitForMotors(true);
 
         //shoot aritfact 1
