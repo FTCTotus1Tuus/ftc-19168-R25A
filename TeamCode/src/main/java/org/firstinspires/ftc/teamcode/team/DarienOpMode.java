@@ -10,14 +10,17 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
     // telemetry
-    TelemetryPacket tp;
-    FtcDashboard dash;
+    public TelemetryPacket tp;
+    public FtcDashboard dash;
     // HARDWARE COMPONENTS
     public DcMotor omniMotor0; // left front
     public DcMotor omniMotor1; // right front
@@ -180,9 +183,26 @@ public class DarienOpMode extends LinearOpMode {
         }
         //sleep(3000);
     }
+    // CONTROL: INTAKE
+    public void automaticIntake() {
+        double startTimeColor = getRuntime();
+        /*
+        telemetry.addData("Gain", gain);
+        telemetry.addLine()
+            .addData("Red", "%.3f", colors.red)
+            .addData("Green", "%.3f", colors.green)
+            .addData("Blue", "%.3f", colors.blue);
 
-
-
+     */
+        if (intakeColorSensor instanceof DistanceSensor) {
+            //telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
+            if (((DistanceSensor)intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime()-startTimeColor) >= 1){
+                startTimeColor = getRuntime();
+                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1,1);
+            }
+        }
+        //telemetry.update();
+    }
 
     public double getHypotenuse(double x, double y) {
         return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
