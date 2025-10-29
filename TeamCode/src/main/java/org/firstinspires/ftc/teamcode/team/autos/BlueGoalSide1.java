@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode.team;
-import com.acmerobotics.dashboard.FtcDashboard;
+package org.firstinspires.ftc.teamcode.team.autos;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import org.firstinspires.ftc.teamcode.team.DarienOpModeAuto;
 
 @Autonomous(name = "BlueGoalSide1", group = "Meet1")
 @Config
