@@ -58,7 +58,7 @@ public class RedGoalSide1 extends DarienOpModeAuto {
         //start spinning down
         sleep(100);
         shotGun(SHOT_GUN_POWER_UP);
-        sleep(500);
+        sleep(600);
         //start spinning up
         Feeder.setPosition(FEEDER_POS_UP);
         //move feeder up while spinner is still spinning

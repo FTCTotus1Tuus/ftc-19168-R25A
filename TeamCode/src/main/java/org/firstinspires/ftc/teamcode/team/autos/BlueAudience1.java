@@ -101,7 +101,7 @@ public class BlueAudience1 extends DarienOpModeAuto {
         //automaticIntake();
 
         //move to pickup mid
-        encoderRotate(Math.toRadians(-40), .5, true);
+        encoderRotate(Math.toRadians(40), .5, true);
         waitForMotors(true);
         moveXY(-24, 0, .3);
         waitForMotors(true);
