@@ -74,7 +74,7 @@ public class DarienOpMode extends LinearOpMode {
     public static double ELEVATOR_POS_DOWN = 0.5;
     public static double FEEDER_POS_UP = .9;
     public static double FEEDER_POS_DOWN = .45;
-
+    public static double SHOT_GUN_POWER_UP = 1;
     @Override
     public void runOpMode() throws InterruptedException {
     }
@@ -119,6 +119,42 @@ public class DarienOpMode extends LinearOpMode {
 
     public double getVoltage() {
         return (hardwareMap.voltageSensor.iterator().next().getVoltage());
+    }
+    public void shotGun(double power) {
+        ejectionMotorLeft.setPower(power);
+        ejectionMotorRight.setPower(-power);
+    }
+    public void shotGunStop() {
+        ejectionMotorLeft.setPower(0);
+        ejectionMotorRight.setPower(0);
+        /*double startTime = getRuntime();
+        double currentTime = startTime;
+        while (currentTime - startTime < seconds) {
+            leftMotor.setPower(power);
+            rightMotor.setPower(-power);
+            currentTime = getRuntime();
+        }
+        leftMotor.setPower(0);
+        rightMotor.setPower(0);
+
+         */
+    }
+
+    public void shootArtifact(){
+     Elevator.setPosition(ELEVATOR_POS_UP);
+     //shotGun(SHOT_GUN_POWER_DOWN);
+     //start spinning down
+     sleep(100);
+     shotGun(SHOT_GUN_POWER_UP);
+     sleep(400);
+     //start spinning up
+     Feeder.setPosition(FEEDER_POS_UP);
+     //move feeder up while spinner is still spinning
+     sleep(500);
+     shotGunStop();
+     //stop spinning
+     Feeder.setPosition(FEEDER_POS_DOWN);
+     Elevator.setPosition(ELEVATOR_POS_DOWN);
     }
 
     public void print(String Name, Object message) {

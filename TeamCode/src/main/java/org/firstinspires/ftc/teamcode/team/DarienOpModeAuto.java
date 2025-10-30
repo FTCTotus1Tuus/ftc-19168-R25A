@@ -31,7 +31,6 @@ public class DarienOpModeAuto extends DarienOpMode {
     public static double normalPower = 0.3;
     public static double verticalSlidePower = 1; //swapped to 1 from 0.8 needs testing
     public static double strafingInefficiencyFactor = 1.145;
-    public static double SHOT_GUN_POWER_UP = 1;
     public static double SHOT_GUN_POWER_UP_GOAL = .85;
     public static double SHOT_GUN_POWER_DOWN = -0.5;
 
@@ -125,26 +124,7 @@ public class DarienOpModeAuto extends DarienOpMode {
         setRunMode();
         setPower(power, adjX, adjY, 0);
     }
-    public void shotGun(double power) {
-        ejectionMotorLeft.setPower(power);
-        ejectionMotorRight.setPower(-power);
-    }
 
-    public void shotGunStop() {
-        ejectionMotorLeft.setPower(0);
-        ejectionMotorRight.setPower(0);
-        /*double startTime = getRuntime();
-        double currentTime = startTime;
-        while (currentTime - startTime < seconds) {
-            leftMotor.setPower(power);
-            rightMotor.setPower(-power);
-            currentTime = getRuntime();
-        }
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-
-         */
-    }
 
     public void autoRotate(double targetPosDegrees, double power) {
         //direction counter clockwise is -1 clockwise is 1

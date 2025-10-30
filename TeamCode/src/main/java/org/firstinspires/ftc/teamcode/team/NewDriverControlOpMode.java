@@ -44,7 +44,10 @@ public class NewDriverControlOpMode extends DarienOpModeTeleop {
             runDriveSystem();
             NormalizedRGBA colors = intakeColorSensor.getNormalizedColors();
           //assigning the ejectionmotorleft/right controls
-            if (gamepad2.right_trigger > 0.05){
+           if (gamepad2.back) {
+             shootArtifact();
+           }
+                if (gamepad2.right_trigger  > 0.05){
                 ejectionMotorLeft.setPower(1);
                 ejectionMotorRight.setPower(-1);
             } else {
