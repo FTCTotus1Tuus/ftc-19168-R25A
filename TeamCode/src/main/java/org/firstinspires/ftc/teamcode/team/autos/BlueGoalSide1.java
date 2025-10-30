@@ -29,7 +29,6 @@ public class BlueGoalSide1 extends DarienOpModeAuto {
 
         //shoot aritfact 1
         //displayTrayTelemetry();
-        Elevator.setPosition(ELEVATOR_POS_UP);
         shootArtifact();
         sleep(500);
         //setBreakpoint();
