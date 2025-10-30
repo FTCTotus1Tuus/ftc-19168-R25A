@@ -146,7 +146,7 @@ public class DarienOpMode extends LinearOpMode {
      //start spinning down
      sleep(100);
      shotGun(SHOT_GUN_POWER_UP);
-     sleep(400);
+     sleep(600);
      //start spinning up
      Feeder.setPosition(FEEDER_POS_UP);
      //move feeder up while spinner is still spinning
