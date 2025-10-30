@@ -28,6 +28,9 @@ public class RedGoalSide1 extends DarienOpModeAuto {
         encoderRotate(Math.toRadians(65),.5,true);
         waitForMotors(true);
 
+        //read obelisk
+
+
         //shoot aritfact 1
         //displayTrayTelemetry();
         Elevator.setPosition(ELEVATOR_POS_UP);
