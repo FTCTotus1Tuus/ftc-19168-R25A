@@ -14,10 +14,20 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.ArrayList;
 
 @Config
 public class DarienOpMode extends LinearOpMode {
+
+    // AprilTag
+    public AprilTagProcessor aprilTag;
+    public VisionPortal visionPortal = null;        // Used to manage the video source.
     // telemetry
     public TelemetryPacket tp;
     public FtcDashboard dash;
@@ -75,6 +85,9 @@ public class DarienOpMode extends LinearOpMode {
     public static double FEEDER_POS_UP = .9;
     public static double FEEDER_POS_DOWN = .45;
     public static double SHOT_GUN_POWER_UP = 1;
+
+    public double TIMEOUT_APRILTAG_DETECTION = 3; // seconds
+
     @Override
     public void runOpMode() throws InterruptedException {
     }
@@ -111,6 +124,8 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor1.setDirection(DcMotor.Direction.REVERSE);
         omniMotor2.setDirection(DcMotor.Direction.REVERSE);
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
+
+        initAprilTag();
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();
@@ -219,6 +234,41 @@ public class DarienOpMode extends LinearOpMode {
         }
         //sleep(3000);
     }
+
+    /**
+     * Initialize the AprilTag processor.
+     */
+    private void initAprilTag() {
+
+        // Create the AprilTag processor the easy way.
+        aprilTag = AprilTagProcessor.easyCreateWithDefaults();
+
+        // Create the vision portal the easy way.
+        visionPortal = VisionPortal.easyCreateWithDefaults(
+                hardwareMap.get(WebcamName.class, "Webcam 1"), aprilTag);
+
+    }
+
+    protected void telemetryAprilTag() {
+
+        ArrayList<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+        }
+    }
+
+
     // CONTROL: INTAKE
     public void automaticIntake() {
         double startTimeColor = getRuntime();
