@@ -113,12 +113,6 @@ public class RedGoalSide1 extends DarienOpModeAuto {
                         shootArtifact();
                         sleep(500);
                         break;
-                    case 24:
-                        telemetry.addData("Goal", "Red");
-                        break;
-                    case 20:
-                        telemetry.addData("Goal", "Blue");
-                        break;
                 }
 
                 //return;
