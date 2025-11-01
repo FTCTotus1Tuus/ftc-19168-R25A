@@ -44,6 +44,7 @@ public class RedAudience1 extends DarienOpModeAuto {
         waitForMotors(true);
 
         // ASSUMES THAT GREEN IS PRELOADED IN POSITION 2
+        // TODO: Compare this to RedGoalSide1.java and create new functions to encapsulate any code that is identical.
         for (AprilTagDetection detection : currentDetections) {
             if (detection.metadata != null) {
                 switch (detection.id) {
