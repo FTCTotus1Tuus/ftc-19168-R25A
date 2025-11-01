@@ -6,14 +6,13 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
-@TeleOp//(name="DC", group="DriverControl")
+@TeleOp(name = "Teleop", group = "DriverControl")
 @Config
-public class NewDriverControlOpMode extends DarienOpModeTeleop {
+public class Teleop extends DarienOpModeTeleop {
     // tuning constants for gobilda 117 rpm motor
 
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide

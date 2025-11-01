@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.team.testing;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -12,6 +13,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+@Disabled
 @TeleOp
 public class cameraDebugTest extends LinearOpMode {
     public VisionPortal visionPortal;

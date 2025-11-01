@@ -3,10 +3,14 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.team.DarienOpModeAuto;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-@Autonomous(name = "BlueGoalSide1", group = "Meet1")
+import java.util.ArrayList;
+
+@Autonomous(name = "Blue GoalSide 1", group = "Blues")
 @Config
 public class BlueGoalSide1 extends DarienOpModeAuto {
+    ArrayList<AprilTagDetection> Motif;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -20,36 +24,27 @@ public class BlueGoalSide1 extends DarienOpModeAuto {
         currentTrayPosition = TRAY_POS_2_SCORE;
 
         //move backwards to read obelisk
-        moveXY(-26, 0, .25);
+        moveXY(-26, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
         //sleep so cam can read apriltag
         sleep(2000);
-        encoderRotate(Math.toRadians(-65),.5,true);
+        //Read the apriltag sequence
+        Motif = readAprilTagSequence();
+
+        waitForMotors(true);
+        moveXY(6, 0, AUTO_MOVE_POWER);
+        waitForMotors(true);
+        encoderRotate(Math.toRadians(-75), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
 
-        //shoot aritfact 1
-        //displayTrayTelemetry();
-        shootArtifact();
-        sleep(500);
-        //setBreakpoint();
+        // ASSUMES THAT GREEN IS PRELOADED IN POSITION 2
+        shootApriltagSequence(Motif);
 
-        //shoot artifact 2
-        //displayTrayTelemetry();
-        servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1, 4);
-        currentTrayPosition = TRAY_POS_3_SCORE;
-        sleep(1000);
-        //displayTrayTelemetry();
-        shootArtifact();
-        sleep(500);
-        //setBreakpoint();
-
-        //shoot artifact 3
-        servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1,4);
-        currentTrayPosition = TRAY_POS_1_SCORE;
-        sleep(1000);
-        shootArtifact();
-        sleep(1000);
-        //automaticIntake();
+        //after shooting 3 artifacts, move to park intake facing red goal for teleop start
+        encoderRotate(Math.toRadians(-20), AUTO_ROTATATE_POWER, true);
+        waitForMotors(true);
+        moveXY(0, 15, AUTO_MOVE_POWER);
+        waitForMotors(true);
     }
 }
 

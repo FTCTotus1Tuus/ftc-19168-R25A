@@ -7,9 +7,10 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "RedAudience1", group = "Meet1")
+@Autonomous(name = "Red Audience 1", group = "Reds")
 @Config
 public class RedAudience1 extends DarienOpModeAuto {
+    ArrayList<AprilTagDetection> Motif;
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -20,106 +21,23 @@ public class RedAudience1 extends DarienOpModeAuto {
         //displayTrayTelemetry();
 
         //move to the desired position
-        moveXY(70, 0, .3);
+        moveXY(70, 0, AUTO_MOVE_POWER);
         Elevator.setPosition(ELEVATOR_POS_DOWN);
         Feeder.setPosition(FEEDER_POS_DOWN);
         servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1,4);
         //TrayServo.setPosition(TRAY_POS_2_SCORE);
         currentTrayPosition = TRAY_POS_2_SCORE;
-
+        sleep(1000);
 
         //read obelisk
-        ArrayList<AprilTagDetection> currentDetections = null;
-        double startTime = getRuntime();
-        do {
-            currentDetections = aprilTag.getDetections();
-            telemetry.addLine("detecting apriltags...");
-            telemetry.update();
-        }
-        while (currentDetections.isEmpty() || getRuntime() - startTime < TIMEOUT_APRILTAG_DETECTION);
-        telemetry.addData("# AprilTags Detected", currentDetections.size());
-        telemetry.update();
+        Motif = readAprilTagSequence();
         waitForMotors(true);
-        encoderRotate(Math.toRadians(40), .5, true);
+        encoderRotate(Math.toRadians(40), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
 
         // ASSUMES THAT GREEN IS PRELOADED IN POSITION 2
         // TODO: Compare this to RedGoalSide1.java and create new functions to encapsulate any code that is identical.
-        for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null) {
-                switch (detection.id) {
-                    case 21:
-                        telemetry.addData("Motif", "GPP");
-                        // telemetryAprilTag(); //TODO: use this telemetry rather than the line above.
-                        // shoot green
-                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_2_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        // shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_3_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        // shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_1_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        break;
-                    case 22:
-                        telemetry.addData("Motif", "PGP");
-                        //shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_1_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        //shoot green
-                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_2_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        //shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_3_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        break;
-                    case 23:
-                        telemetry.addData("Motif", "PPG");
-                        //shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_1_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        //shoot purple
-                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_3_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        //shoot green
-                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
-                        currentTrayPosition = TRAY_POS_2_SCORE;
-                        sleep(1000);
-                        shootArtifact();
-                        sleep(500);
-                        break;
-                }
-
-                //return;
-            } else {
-                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-            }
-        }
+        shootApriltagSequence(Motif);
 
         /*
         telemetry.addData("omnimotor 0: ", omniMotor0.getCurrentPosition());
@@ -132,13 +50,13 @@ public class RedAudience1 extends DarienOpModeAuto {
         //move to the desired position
         //moveXY(70, 0, .3);
         //TrayServo.setPosition(TRAY_POS_2_SCORE);
-       // waitForMotors(true);
-       // encoderRotate(Math.toRadians(40), .5, true);
+        // waitForMotors(true);
+        // encoderRotate(Math.toRadians(40), .5, true);
         //waitForMotors(true);
 
         //shoot aritfact 1
         //displayTrayTelemetry();
-       shootArtifact();
+        //shootArtifact();
         sleep(500);
         //setBreakpoint();
 
@@ -162,13 +80,13 @@ public class RedAudience1 extends DarienOpModeAuto {
         */
 
         //move to pickup mid
-        encoderRotate(Math.toRadians(-40), .5, true);
+        encoderRotate(Math.toRadians(-40), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
-        moveXY(-24, 0, .3);
+        moveXY(-24, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
-        encoderRotate(Math.toRadians(105), .5, true);
+        encoderRotate(Math.toRadians(105), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
-        moveXY(4, 0, .5);
+        moveXY(4, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
     }
 

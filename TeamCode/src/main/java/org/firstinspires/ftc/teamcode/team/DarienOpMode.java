@@ -80,8 +80,8 @@ public class DarienOpMode extends LinearOpMode {
     public double currentTrayPosition;
     public static double INTAKE_DISTANCE = 5;//in CM
     public static double INTAKE_TIME = 1;
-    public static double ELEVATOR_POS_UP = 0.9;
-    public static double ELEVATOR_POS_DOWN = 0.5;
+    public static double ELEVATOR_POS_UP = 0.83;
+    public static double ELEVATOR_POS_DOWN = 0.45;
     public static double FEEDER_POS_UP = .9;
     public static double FEEDER_POS_DOWN = .45;
     public static double SHOT_GUN_POWER_UP = 1;
@@ -261,6 +261,105 @@ public class DarienOpMode extends LinearOpMode {
                 telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
                 telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
                 telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+        }
+    }
+
+    /**
+     * Detect apriltag motif
+     */
+    public ArrayList<AprilTagDetection> readAprilTagSequence() {
+        ArrayList<AprilTagDetection> currentDetections = null;
+        double startTime = getRuntime();
+        do {
+            currentDetections = aprilTag.getDetections();
+            telemetry.addLine("detecting apriltags...");
+            telemetry.update();
+        }
+        while (currentDetections.isEmpty() || getRuntime() - startTime < TIMEOUT_APRILTAG_DETECTION);
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+        telemetry.update();
+
+        return currentDetections;
+    }
+
+    /**
+     * Shoot the correct pattern by using the readApriltagSequence function
+     */
+    public void shootApriltagSequence(ArrayList<AprilTagDetection> currentDetections) {
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                switch (detection.id) {
+                    case 21:
+                        telemetry.addData("Motif", "GPP");
+                        // telemetryAprilTag(); //TODO: use this telemetry rather than the line above.
+                        // shoot green
+                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_2_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        // shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_3_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        // shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_1_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        break;
+                    case 22:
+                        telemetry.addData("Motif", "PGP");
+                        //shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_1_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        //shoot green
+                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_2_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        //shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_3_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        break;
+                    case 23:
+                        telemetry.addData("Motif", "PPG");
+                        //shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_1_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        //shoot purple
+                        servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_3_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        //shoot green
+                        servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+                        currentTrayPosition = TRAY_POS_2_SCORE;
+                        sleep(1000);
+                        shootArtifact();
+                        sleep(500);
+                        break;
+                }
+
+                //return;
             } else {
                 telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
                 telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
