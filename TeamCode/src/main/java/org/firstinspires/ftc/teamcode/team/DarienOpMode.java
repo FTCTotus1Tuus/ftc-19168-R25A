@@ -46,6 +46,8 @@ public class DarienOpMode extends LinearOpMode {
     public DcMotor ejectionMotorRight;
     public DcMotor ejectionMotorLeft;
     public NormalizedColorSensor intakeColorSensor;
+    public CRServo activeIntake1;
+    public CRServo activeIntake2;
 
     //    public IMU imu;
    // public GoBildaPinpointDriver odo;
@@ -87,6 +89,7 @@ public class DarienOpMode extends LinearOpMode {
     public static double SHOT_GUN_POWER_UP = 1;
 
     public double TIMEOUT_APRILTAG_DETECTION = 3; // seconds
+    public static double ACTIVE_INTAKE_POWER = 0.2;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -110,6 +113,8 @@ public class DarienOpMode extends LinearOpMode {
         Elevator = hardwareMap.get(Servo.class, "Elevator");
         IntakeServo = hardwareMap.get(Servo.class, "intakeServo");
         Feeder = hardwareMap.get(Servo.class, "Feeder");
+        activeIntake1 = hardwareMap.get(CRServo.class, "activeIntake1");
+        activeIntake2 = hardwareMap.get(CRServo.class, "activeIntake2");
         // INITIALIZE SENSORS
         intakeColorSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeColorSensor");
         // INITIALIZE MOTORS
@@ -155,7 +160,7 @@ public class DarienOpMode extends LinearOpMode {
          */
     }
 
-    public void shootArtifact(){
+    public void shootArtifact() {
      Elevator.setPosition(ELEVATOR_POS_UP);
      //shotGun(SHOT_GUN_POWER_DOWN);
      //start spinning down

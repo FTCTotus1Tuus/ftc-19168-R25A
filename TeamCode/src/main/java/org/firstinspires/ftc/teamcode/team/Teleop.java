@@ -43,6 +43,8 @@ public class Teleop extends DarienOpModeTeleop {
             runDriveSystem();
             NormalizedRGBA colors = intakeColorSensor.getNormalizedColors();
           //assigning the ejectionmotorleft/right controls
+            activeIntake1.setPower(ACTIVE_INTAKE_POWER);
+            activeIntake2.setPower(-ACTIVE_INTAKE_POWER);
            if (gamepad2.back) {
              shootArtifact();
            }
