@@ -32,7 +32,7 @@ public class BlueAudience1 extends DarienOpModeAuto {
         //read obelisk
         Motif = readAprilTagSequence();
         waitForMotors(true);
-        encoderRotate(Math.toRadians(-40), AUTO_ROTATATE_POWER, true);
+        encoderRotate(Math.toRadians(-50), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
         moveXY(10, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
@@ -43,13 +43,11 @@ public class BlueAudience1 extends DarienOpModeAuto {
         //move to pickup mid
         moveXY(-10, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
-        encoderRotate(Math.toRadians(40), AUTO_ROTATATE_POWER, true);
+        encoderRotate(Math.toRadians(55), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
-        moveXY(-24, 0, AUTO_MOVE_POWER);
+        moveXY(-40, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
-        encoderRotate(Math.toRadians(-105), AUTO_ROTATATE_POWER, true);
-        waitForMotors(true);
-        moveXY(4, 0, AUTO_MOVE_POWER);
+        encoderRotate(Math.toRadians(90), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
     }
 

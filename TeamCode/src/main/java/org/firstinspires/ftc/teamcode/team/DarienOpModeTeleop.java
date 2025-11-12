@@ -11,6 +11,8 @@ public class DarienOpModeTeleop extends DarienOpMode {
     public double[] direction = {0.0, 0.0};
     public double rotation;
     public static double rtvoltage = 0.01;
+    public double shootArtifactStartTime;
+    public int shootArtifactState = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -140,6 +142,40 @@ public class DarienOpModeTeleop extends DarienOpMode {
 
     public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
+    }
+
+
+    /**
+     * Macro to shoot artifacts once the tray is in the shoot position.
+     */
+    @Override
+    public void shootArtifact() {
+        /*
+        if (shootArtifactState == 0) {
+            shootArtifactStartTime = getRuntime();
+            Elevator.setPosition(ELEVATOR_POS_UP);
+        }
+        if (shootArtifactState == 0 && getRuntime() - shootArtifactStartTime > 100) {
+            //start spinning up
+            shotGun(SHOT_GUN_POWER_UP);
+            shootArtifactStartTime = getRuntime();
+            shootArtifactState = 1;
+        }
+        if (shootArtifactState == 1 && getRuntime() - shootArtifactStartTime > 600) {
+            Feeder.setPosition(FEEDER_POS_UP);
+            //move feeder up while spinner is still spinning
+            shootArtifactStartTime = getRuntime();
+            shootArtifactState = 2;
+        }
+        if (shootArtifactState == 2 && getRuntime() - shootArtifactStartTime > 500) {
+            shotGunStop();
+            //stop spinning
+            Feeder.setPosition(FEEDER_POS_DOWN);
+            Elevator.setPosition(ELEVATOR_POS_DOWN);
+            shootArtifactState = 0; // reset
+        }
+
+         */
     }
 
 }

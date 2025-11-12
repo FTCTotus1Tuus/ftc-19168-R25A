@@ -21,8 +21,8 @@ public class DarienOpModeAuto extends DarienOpMode {
     public static double strafingInefficiencyFactor = 1.145;
     public static double SHOT_GUN_POWER_UP_GOAL = .85;
     public static double SHOT_GUN_POWER_DOWN = -0.5;
-    public static double AUTO_MOVE_POWER = 0.75;
-    public static double AUTO_ROTATATE_POWER = .5;
+    public static double AUTO_MOVE_POWER = 0.65;
+    public static double AUTO_ROTATATE_POWER = .40;
 
 
     public double movementStartTime;

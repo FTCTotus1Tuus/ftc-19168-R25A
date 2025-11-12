@@ -7,7 +7,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
-@Autonomous(name = "Blue GoalSide 1", group = "Blues")
+@Autonomous(name = "Blue GoalSide 1", group = "Blues", preselectTeleOp = "Teleop")
 @Config
 public class BlueGoalSide1 extends DarienOpModeAuto {
     ArrayList<AprilTagDetection> Motif;
@@ -24,27 +24,27 @@ public class BlueGoalSide1 extends DarienOpModeAuto {
         currentTrayPosition = TRAY_POS_2_SCORE;
 
         //move backwards to read obelisk
-        moveXY(-26, 0, AUTO_MOVE_POWER);
+        moveXY(-24, 0, AUTO_MOVE_POWER);
         waitForMotors(true);
-        //sleep so cam can read apriltag
-        sleep(2000);
-        //Read the apriltag sequence
+        encoderRotate(Math.toRadians(80), AUTO_ROTATATE_POWER, true);
+        waitForMotors(true);
+        //sleep to read apriltag
+        sleep(1000);
         Motif = readAprilTagSequence();
-
+        encoderRotate(Math.toRadians(-80), AUTO_ROTATATE_POWER, true);
         waitForMotors(true);
-        moveXY(6, 0, AUTO_MOVE_POWER);
-        waitForMotors(true);
-        encoderRotate(Math.toRadians(-75), AUTO_ROTATATE_POWER, true);
-        waitForMotors(true);
-
         // ASSUMES THAT GREEN IS PRELOADED IN POSITION 2
         shootApriltagSequence(Motif);
 
+        encoderRotate(Math.toRadians(180), AUTO_ROTATATE_POWER, true);
+        waitForMotors(true);
+        moveXY(-10, 10, AUTO_MOVE_POWER);
+        waitForMotors(true);
+
         //after shooting 3 artifacts, move to park intake facing red goal for teleop start
-        encoderRotate(Math.toRadians(-20), AUTO_ROTATATE_POWER, true);
-        waitForMotors(true);
-        moveXY(0, 15, AUTO_MOVE_POWER);
-        waitForMotors(true);
+        //encoderRotate(Math.toRadians(-20), AUTO_ROTATATE_POWER, true);
+        //waitForMotors(true);
+        //moveXY(0, 15, AUTO_MOVE_POWER);
+        //waitForMotors(true);
     }
 }
-
