@@ -46,8 +46,7 @@ public class DarienOpMode extends LinearOpMode {
     public DcMotor ejectionMotorRight;
     public DcMotor ejectionMotorLeft;
     public NormalizedColorSensor intakeColorSensor;
-    public CRServo activeIntake1;
-    public CRServo activeIntake2;
+    public CRServo rubberBands;
 
     //    public IMU imu;
    // public GoBildaPinpointDriver odo;
@@ -89,7 +88,8 @@ public class DarienOpMode extends LinearOpMode {
     public static double SHOT_GUN_POWER_UP = 1;
 
     public double TIMEOUT_APRILTAG_DETECTION = 3; // seconds
-    public static double ACTIVE_INTAKE_POWER = 0.2;
+    public static double INTAKE_RUBBER_BANDS_POWER = -0.2;
+    public static double OUTPUT_RUBBER_BANDS_POWER = -INTAKE_RUBBER_BANDS_POWER;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -113,8 +113,7 @@ public class DarienOpMode extends LinearOpMode {
         Elevator = hardwareMap.get(Servo.class, "Elevator");
         IntakeServo = hardwareMap.get(Servo.class, "intakeServo");
         Feeder = hardwareMap.get(Servo.class, "Feeder");
-        activeIntake1 = hardwareMap.get(CRServo.class, "activeIntake1");
-        activeIntake2 = hardwareMap.get(CRServo.class, "activeIntake2");
+        rubberBands = hardwareMap.get(CRServo.class, "rubberBands");
         // INITIALIZE SENSORS
         intakeColorSensor = hardwareMap.get(NormalizedColorSensor.class, "intakeColorSensor");
         // INITIALIZE MOTORS
