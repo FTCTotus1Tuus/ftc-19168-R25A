@@ -88,8 +88,8 @@ public class DarienOpMode extends LinearOpMode {
     public static double SHOT_GUN_POWER_UP = 1;
 
     public double TIMEOUT_APRILTAG_DETECTION = 3; // seconds
-    public static double INTAKE_RUBBER_BANDS_POWER = -0.2;
-    public static double OUTPUT_RUBBER_BANDS_POWER = -INTAKE_RUBBER_BANDS_POWER;
+    public static double INTAKE_RUBBER_BANDS_POWER = -0.5;
+    public static double OUTPUT_RUBBER_BANDS_POWER = 0.2;
 
     @Override
     public void runOpMode() throws InterruptedException {
