@@ -10,24 +10,30 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.team.DarienOpModeAuto;
 
+/**
+ * Pedro Pathing auto using LinearOpMode via DarienOpMode.
+ */
 @Autonomous(name = "BlueGoalSidePedro", group = "Autonomous")
-@Configurable // Panels
+@Configurable
 public class BlueGoalSide1 extends DarienOpModeAuto {
 
-    private TelemetryManager panelsTelemetry; // Panels Telemetry instance
-    public Follower follower; // Pedro Pathing follower instance
-    private int pathState; // Current autonomous path state (state machine)
-    private Paths paths; // Paths defined in the Paths class
-    private Timer pathTimer, actionTimer, opmodeTimer;
-    private DarienOpModeAuto darienOpModeAuto = new DarienOpModeAuto();
+    private TelemetryManager panelsTelemetry;   // Panels Telemetry instance
+    public Follower follower;                   // Pedro Pathing follower instance
+    private int pathState;                      // State machine state
+    private Paths paths;                        // Paths
+    private Timer pathTimer, opmodeTimer;
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
+
+        // --- ROBOT + HARDWARE INIT (from DarienOpMode) ---
+        initControls(); // sets up TrayServo, Elevator, Feeder, motors, AprilTag, etc.
+
+        // --- PEDRO + TIMERS INIT ---
         pathTimer = new Timer();
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
@@ -35,33 +41,48 @@ public class BlueGoalSide1 extends DarienOpModeAuto {
         panelsTelemetry = PanelsTelemetry.INSTANCE.getTelemetry();
 
         follower = Constants.createFollower(hardwareMap);
+        // Starting pose – same as your OpMode version
         follower.setStartingPose(new Pose(20.286, 124.378, Math.toRadians(54)));
 
-        paths = new Paths(follower); // Build paths
+        // Build all the paths once
+        paths = new Paths(follower);
 
         panelsTelemetry.debug("Status", "Initialized");
         panelsTelemetry.update(telemetry);
-    }
 
-    @Override
-    public void start() {
+        telemetry.addLine("BlueGoalSidePedro: READY");
+        telemetry.update();
+
+        // --- WAIT FOR START ---
+        waitForStart();
+        if (isStopRequested()) return;
+
         opmodeTimer.resetTimer();
         setPathState(0);
+
+        // --- MAIN AUTONOMOUS LOOP ---
+        while (opModeIsActive() && !isStopRequested()) {
+
+            // Pedro follower must be updated every loop
+            follower.update();
+
+            // Drive the state machine
+            pathState = autonomousPathUpdate();
+
+            // Panels/driver telemetry
+            panelsTelemetry.debug("Path State", pathState);
+            panelsTelemetry.debug("X", follower.getPose().getX());
+            panelsTelemetry.debug("Y", follower.getPose().getY());
+            panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+            panelsTelemetry.update(telemetry);
+
+            telemetry.update();
+        }
     }
 
-    @Override
-    public void loop() {
-        follower.update(); // Update Pedro Pathing
-        pathState = autonomousPathUpdate(); // Update autonomous state machine
-
-        // Log values to Panels and Driver Station
-        panelsTelemetry.debug("Path State", pathState);
-        panelsTelemetry.debug("X", follower.getPose().getX());
-        panelsTelemetry.debug("Y", follower.getPose().getY());
-        panelsTelemetry.debug("Heading", follower.getPose().getHeading());
-        panelsTelemetry.update(telemetry);
-    }
-
+    /**
+     * Inner class defining all the Pedro paths.
+     */
     public static class Paths {
 
         public PathChain Path1;
@@ -126,95 +147,96 @@ public class BlueGoalSide1 extends DarienOpModeAuto {
         }
     }
 
+    /**
+     * State machine for autonomous sequence.
+     * Returns current pathState for logging.
+     */
     public int autonomousPathUpdate() {
-        // Add your state machine Here
-        // Access paths with paths.pathName
-        // Refer to the Pedro Pathing Docs (Auto Example) for an example state machine
+
+        // Helpful debug info every loop
+        telemetry.addData("PathState", pathState);
+        telemetry.addData("FollowerBusy", follower.isBusy());
+        telemetry.addData("PathTimer", pathTimer.getElapsedTimeSeconds());
 
         switch (pathState) {
             case 0:
-                telemetry.addLine("Im in case 0");
+                telemetry.addLine("Case 0: Start Path1");
+                // Start first path ONCE
                 follower.followPath(paths.Path1);
                 setPathState(1);
                 break;
+
             case 1:
-            /* You could check for
-            - Follower State: "if(!follower.isBusy()) {}"
-            - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-            - Robot Position: "if(follower.getPose().getX() > 36) {}"
-            */
-                telemetry.addLine("Im in case 1");
-                if (!follower.isBusy()) {
+                telemetry.addLine("Case 1: Wait for Path1, then start Path2");
+                // Safety timeout in case isBusy() never goes false
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case 1: Moving to Path2");
                     follower.followPath(paths.Path2, true);
                     setPathState(2);
                 }
                 break;
+
             case 2:
-                telemetry.addLine("Im in case 2");
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 4) {
+                telemetry.addLine("Case 2: Wait for Path2, then start Path3");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case 2: Moving to Path3");
                     follower.followPath(paths.Path3, true);
                     setPathState(3);
                 }
                 break;
+
             case 3:
+                telemetry.addLine("Case 3: Shoot once at scoring position");
+
+                // Use DarienOpMode hardware directly
                 TrayServo.setPosition(TRAY_POS_2_SCORE);
                 currentTrayPosition = TRAY_POS_2_SCORE;
-                // TODO; replace sleeps with timer
-                //sleep(1000);
-                shootArtifact();
-                //sleep(500);
-                /*
-                // shoot purple
-                servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_3_SCORE;
-                sleep(1000);
-                shootArtifact();
-                sleep(500);
-                // shoot purple
-                servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_1_SCORE;
-                sleep(1000);
-                shootArtifact();
-                sleep(500);
 
-                 */
+                shootArtifact(); // from DarienOpMode
+
+                // After shooting, continue along Path4
+                follower.followPath(paths.Path4, true);
+                setPathState(4);
                 break;
+
             case 4:
-                telemetry.addLine("Im in case 3");
-                if (!follower.isBusy()) {
-                    follower.followPath(paths.Path4, true);
-                    setPathState(4);
-                }
-                break;
-            case 5:
-                telemetry.addLine("Im in case 4");
-                if (!follower.isBusy()) {
+                telemetry.addLine("Case 4: Wait for Path4, then start Path5");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case 4: Moving to Path5");
                     follower.followPath(paths.Path5, true);
                     setPathState(5);
                 }
                 break;
-            case 6:
-                telemetry.addLine("Im in case 5");
-                if (!follower.isBusy()) {
+
+            case 5:
+                telemetry.addLine("Case 5: Wait for Path5, then start Path6");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case 5: Moving to Path6");
                     follower.followPath(paths.Path6, true);
                     setPathState(6);
                 }
                 break;
-            case 7:
-                telemetry.addLine("Im in case 6");
-                if (!follower.isBusy()) {
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
+
+            case 6:
+                telemetry.addLine("Case 6: Wait for Path6 to finish, then stop");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case 6: Done, setting state -1");
+                    setPathState(-1); // done
                 }
                 break;
+
+            default:
+                // -1 or any undefined state: do nothing, stay idle
+                telemetry.addLine("Idle state (pathState = " + pathState + ")");
+                break;
         }
+
         return pathState;
     }
 
     /**
-     * These change the states of the paths and actions. It will also reset the timers of the individual switches
-     **/
+     * Sets the path state and resets its timer.
+     */
     public void setPathState(int pState) {
         pathState = pState;
         pathTimer.resetTimer();
