@@ -12,14 +12,14 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.team.DarienOpModeAuto;
+import org.firstinspires.ftc.teamcode.team.DarienOpMode;
 
 /**
  * Pedro Pathing auto using LinearOpMode via DarienOpMode.
  */
 @Autonomous(name = "BlueGoalSidePedro", group = "Autonomous")
 @Configurable
-public class BlueGoalSide1 extends DarienOpModeAuto {
+public class BlueGoalSide1 extends DarienOpMode {
 
     private TelemetryManager panelsTelemetry;   // Panels Telemetry instance
     public Follower follower;                   // Pedro Pathing follower instance
