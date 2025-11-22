@@ -47,6 +47,7 @@ public class Teleop extends DarienOpModeTeleop {
                 rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
             } else if (gamepad1.a) {
                 rubberBands.setPower(OUTPUT_RUBBER_BANDS_POWER);
+                // TODO: stop the intake servo from lifting.
             } else if (gamepad1.x) {
                 rubberBands.setPower(0);
             }

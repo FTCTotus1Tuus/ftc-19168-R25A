@@ -169,8 +169,9 @@ public class BlueGoalSide1 extends DarienOpMode {
                 telemetry.addLine("Case " + pathState + ": Start Path1");
 
                 // Set the initial tray position
-                TrayServo.setPosition(TRAY_POS_2_SCORE);
-                currentTrayPosition = TRAY_POS_2_SCORE;
+                //setTrayPosition(TRAY_POS_2_SCORE);
+                servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+
 
                 // Start first path ONCE
                 follower.followPath(paths.Path1);
@@ -183,7 +184,7 @@ public class BlueGoalSide1 extends DarienOpMode {
                 // TODO: Start AprilTag reading here while driving Path1
 
                 if (!follower.isBusy()
-                        && pathTimer.getElapsedTimeSeconds() > 4.0 // Wait for the camera to read the AprilTag
+                        && pathTimer.getElapsedTimeSeconds() > 5.0 // Wait for the camera to read the AprilTag
                 ) {
                     telemetry.addLine("Case " + pathState + ": exiting");
                     follower.followPath(paths.Path2);
@@ -219,7 +220,9 @@ public class BlueGoalSide1 extends DarienOpMode {
                     //setBreakpoint();
 
                     rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
-                    setTrayPosition(TRAY_POS_2_INTAKE);
+                    //setTrayPosition(TRAY_POS_2_INTAKE);
+                    servoIncremental(TrayServo, TRAY_POS_2_INTAKE, currentTrayPosition, 1, 4);
+
 
                     // now continue with next path
                     follower.followPath(paths.Path3, true);
@@ -232,16 +235,21 @@ public class BlueGoalSide1 extends DarienOpMode {
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact");
 
+                    follower.setMaxPower(0.3); //slow down for pickup
+
                     //setBreakpoint();
                     follower.followPath(paths.Path4, true);
                     setPathState(pathState + 1);
                 }
                 break;
-
+            /*
             case 6:
                 telemetry.addLine("Case " + pathState + ": Wait for Path4 to pick up artifact, then start Path5");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
+
+                    follower.setMaxPower(0.8); //resume normal speed
+
                     //setBreakpoint();
                     follower.followPath(paths.Path5, true);
                     setPathState(pathState + 1);
@@ -266,6 +274,7 @@ public class BlueGoalSide1 extends DarienOpMode {
                     setPathState(-1); // done
                 }
                 break;
+             */
 
             default:
                 // -1 or any undefined state: do nothing, stay idle

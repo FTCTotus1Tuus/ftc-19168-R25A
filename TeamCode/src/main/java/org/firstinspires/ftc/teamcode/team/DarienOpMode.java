@@ -315,6 +315,7 @@ public class DarienOpMode extends LinearOpMode {
                 currentPos = ((startPos - endPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + endPos;
             }
             servo.setPosition(currentPos/divisor);
+            currentTrayPosition = currentPos / divisor;
             /*
             if (currentTime - Last_Time >= 0.240 ){
                 servo.setPosition(currentPos);
