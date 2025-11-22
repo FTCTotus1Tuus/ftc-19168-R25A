@@ -69,6 +69,8 @@ public class BlueGoalSide1 extends DarienOpMode {
             // Drive the state machine
             pathState = autonomousPathUpdate();
 
+            runIntakeLifterWithColorSensor();
+
             // Panels/driver telemetry
             panelsTelemetry.debug("Path State", pathState);
             panelsTelemetry.debug("X", follower.getPose().getX());
@@ -104,23 +106,27 @@ public class BlueGoalSide1 extends DarienOpMode {
             Path2 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(47.224, 96.443), new Pose(47.224, 96.443))
+                            new BezierLine(
+                                    new Pose(47.224, 96.443, Math.toRadians(70)),   // Start pose with initial heading
+                                    new Pose(47.234, 96.443, Math.toRadians(145))   // End pose with target heading
+                            )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(135))
+                    .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(145))
                     .build();
+
 
             Path3 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(47.224, 96.443), new Pose(40.739, 84.305))
+                            new BezierLine(new Pose(47.224, 96.443), new Pose(42.069, 86.799))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
                     .build();
 
             Path4 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(34.420, 84.305), new Pose(18.291, 84.305))
+                            new BezierLine(new Pose(42.069, 86.799), new Pose(35.085, 86.799))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -129,7 +135,7 @@ public class BlueGoalSide1 extends DarienOpMode {
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(18.291, 84.305),
+                                    new Pose(35.085, 86.799),
                                     new Pose(39.409, 85.136),
                                     new Pose(47.224, 96.443)
                             )
@@ -160,92 +166,103 @@ public class BlueGoalSide1 extends DarienOpMode {
 
         switch (pathState) {
             case 0:
-                telemetry.addLine("Case 0: Start Path1");
+                telemetry.addLine("Case " + pathState + ": Start Path1");
+
+                // Set the initial tray position
+                TrayServo.setPosition(TRAY_POS_2_SCORE);
+                currentTrayPosition = TRAY_POS_2_SCORE;
+
                 // Start first path ONCE
                 follower.followPath(paths.Path1);
-                setPathState(1);
+                setPathState(pathState + 1);
                 break;
 
             case 1:
-                telemetry.addLine("Case 1: Wait for Path1, then start Path2");
+                telemetry.addLine("Case " + pathState + ": Wait for Path1, then start Path2");
 
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 1: Moving to Path2");
-                    follower.followPath(paths.Path2, true);
-                    setPathState(2);
+                // TODO: Start AprilTag reading here while driving Path1
+
+                if (!follower.isBusy()
+                        && pathTimer.getElapsedTimeSeconds() > 4.0 // Wait for the camera to read the AprilTag
+                ) {
+                    telemetry.addLine("Case " + pathState + ": exiting");
+                    follower.followPath(paths.Path2);
+                    setPathState(pathState + 1);
                 }
                 break;
 
             case 2:
-                telemetry.addLine("Case 2: Wait for Path2, then shoot artifact");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 2: Moving to shoot pos");
-                    //follower.followPath(paths.Path3, true);
-                    setPathState(3);
+                telemetry.addLine("Case " + pathState + ": Wait for Path2, then shoot artifact");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.0) {
+                    telemetry.addLine("Case " + pathState + ": exiting");
+                    setPathState(pathState + 1);
                 }
                 break;
 
             case 3:
-                telemetry.addLine("Case 3: Shoot once at scoring position");
+                telemetry.addLine("Case " + pathState + ": start shooting");
 
-                // Use DarienOpMode hardware directly
-                TrayServo.setPosition(TRAY_POS_2_SCORE);
-                currentTrayPosition = TRAY_POS_2_SCORE;
+                startShooting();
 
-                startShooting();// from DarienOpMode
-                setPathState(35);
-
-                TrayServo.setPosition(TRAY_POS_2_SCORE);
-
-
-                // After shooting, continue along Path4
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 7.0) {
-                    follower.followPath(paths.Path3, true);
-                    setPathState(4);
-                }
-                break;
-
-            case 35:
-                updateShooting();
-                if (shootingDone()) {
-                    resetShooting();
-
-                    // now continue with next path
-                    follower.followPath(paths.Path4, true);
-                    setPathState(4);
+                if (pathTimer.getElapsedTimeSeconds() > 1.0) {
+                    setPathState(pathState + 1);
                 }
                 break;
 
             case 4:
-                telemetry.addLine("Case 4: Wait for Path4, then start Path5");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 4: Moving to Path5");
-                    follower.followPath(paths.Path4, true);
-                    setPathState(5);
+                telemetry.addLine("Case " + pathState + ": updateShooting...");
+                updateShooting(1);
+                // TODO: Shoot all 3 artifacts before proceeding
+
+                if (shootingDone() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    resetShooting();
+                    //setBreakpoint();
+
+                    rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
+                    setTrayPosition(TRAY_POS_2_INTAKE);
+
+                    // now continue with next path
+                    follower.followPath(paths.Path3, true);
+                    setPathState(pathState + 1);
                 }
                 break;
 
             case 5:
-                telemetry.addLine("Case 5: Wait for Path5, then start Path6");
+                telemetry.addLine("Case " + pathState + ": Wait for Path3, then start Path4");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 5: Moving to Path6");
-                    follower.followPath(paths.Path5, true);
-                    setPathState(6);
+                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact");
+
+                    //setBreakpoint();
+                    follower.followPath(paths.Path4, true);
+                    setPathState(pathState + 1);
                 }
                 break;
 
             case 6:
-                telemetry.addLine("Case 6: Wait for Path6 to finish, then stop");
+                telemetry.addLine("Case " + pathState + ": Wait for Path4 to pick up artifact, then start Path5");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 6: Done, setting state -1");
-                    follower.followPath(paths.Path6, true);
-                    setPathState(7); // done
+                    telemetry.addLine("Case " + pathState + ": Moving to shooting position");
+                    //setBreakpoint();
+                    follower.followPath(paths.Path5, true);
+                    setPathState(pathState + 1);
                 }
                 break;
+
             case 7:
-                telemetry.addLine("Case 6: Wait for Path6 to finish, then stop");
+                telemetry.addLine("Case " + pathState + ": Wait for Path5 to get into position, then start Path6");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case 6: Done, setting state -1");
+                    telemetry.addLine("Case " + pathState + ": Moving to Path6");
+                    //setBreakpoint();
+                    follower.followPath(paths.Path6, true);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 8:
+                telemetry.addLine("Case " + pathState + ": Wait for Path6 to finish, then stop");
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                    telemetry.addLine("Case " + pathState + ": Done, setting state -1");
+                    rubberBands.setPower(0);
                     setPathState(-1); // done
                 }
                 break;

@@ -91,6 +91,8 @@ public class DarienOpMode extends LinearOpMode {
     public static double INTAKE_RUBBER_BANDS_POWER = -0.7;
     public static double OUTPUT_RUBBER_BANDS_POWER = 0.2;
 
+    double startTimeIntakeColorSensor;
+
     @Override
     public void runOpMode() throws InterruptedException {
     }
@@ -130,6 +132,8 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
 
         initAprilTag();
+
+        startTimeIntakeColorSensor = getRuntime();
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();
@@ -176,6 +180,11 @@ public class DarienOpMode extends LinearOpMode {
      Elevator.setPosition(ELEVATOR_POS_DOWN);
     }
 
+    public void setBreakpoint() {
+        while (!gamepad1.x) {
+        }
+    }
+
     // ===============================
 //   SHOOTING STATE MACHINE
 // ===============================
@@ -189,35 +198,35 @@ public class DarienOpMode extends LinearOpMode {
     }
 
     private ShootingStage shootingStage = ShootingStage.IDLE;
-    private long shootingStartTime = 0;
+    private double shootingStartTime = 0;
 
-    // Timings (milliseconds)
-    private static final long STAGE1_DELAY = 100;    // elevator up -> shotgun start
-    private static final long STAGE2_DELAY = 600;    // shotgun running before feeder
-    private static final long STAGE3_DELAY = 500;    // feeder up while spinning
+    // Timings (seconds)
+    private static final double STAGE1_DELAY = .100;    // elevator up -> shotgun start
+    private static final double STAGE2_DELAY = .600;    // shotgun running before feeder
+    private static final double STAGE3_DELAY = .500;    // feeder up while spinning
 
     // Call this to begin shooting
     public void startShooting() {
         shootingStage = ShootingStage.ELEVATOR_UP;
-        shootingStartTime = System.currentTimeMillis();
+        shootingStartTime = getRuntime();
 
         Elevator.setPosition(ELEVATOR_POS_UP);
     }
 
     // Call this inside loop() or inside your main auto while-loop
-    public void updateShooting() {
+    public void updateShooting(double shootingPower) {
         if (shootingStage == ShootingStage.IDLE ||
                 shootingStage == ShootingStage.FINISHED) {
             return;
         }
 
-        long elapsed = System.currentTimeMillis() - shootingStartTime;
+        double elapsed = getRuntime() - shootingStartTime;
 
         switch (shootingStage) {
 
             case ELEVATOR_UP:
                 if (elapsed >= STAGE1_DELAY) {
-                    shotGun(SHOT_GUN_POWER_UP);
+                    shotGun(SHOT_GUN_POWER_UP * shootingPower);
                     shootingStage = ShootingStage.SHOTGUN_SPINUP;
                 }
                 break;
@@ -250,6 +259,26 @@ public class DarienOpMode extends LinearOpMode {
         shootingStage = ShootingStage.IDLE;
     }
 
+    /**
+     * Set the tray position and update the currentTrayPosition variable.
+     *
+     * @param position The desired position for the tray servo.
+     */
+    public void setTrayPosition(double position) {
+        TrayServo.setPosition(position);
+        currentTrayPosition = position;
+    }
+
+    public void runIntakeLifterWithColorSensor() {
+        if (intakeColorSensor instanceof DistanceSensor) {
+            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1) {
+                startTimeIntakeColorSensor = getRuntime();
+                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1, 1);
+            } else {
+                IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
+            }
+        }
+    }
 
     public void print(String Name, Object message) {
         //saves a line for quick debug messages
