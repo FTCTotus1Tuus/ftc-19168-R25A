@@ -16,6 +16,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.team.fsm.AprilTagDetectionFSM;
+import org.firstinspires.ftc.teamcode.team.fsm.ShootPatternFSM;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -25,7 +27,12 @@ import java.util.ArrayList;
 @Config
 public class DarienOpMode extends LinearOpMode {
 
+    // FINITE STATE MACHINES (FSM)
+    public AprilTagDetectionFSM tagFSM;
+    public ShootPatternFSM shootPatternFSM;
+
     // AprilTag
+    public ArrayList<AprilTagDetection> aprilTagDetections;
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal = null;        // Used to manage the video source.
     // telemetry
@@ -132,6 +139,9 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
 
         initAprilTag();
+        tagFSM = new AprilTagDetectionFSM(aprilTag, TIMEOUT_APRILTAG_DETECTION);
+
+        shootPatternFSM = new ShootPatternFSM(this);
 
         startTimeIntakeColorSensor = getRuntime();
 

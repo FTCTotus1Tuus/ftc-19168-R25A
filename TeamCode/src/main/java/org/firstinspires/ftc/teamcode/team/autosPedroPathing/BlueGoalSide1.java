@@ -13,6 +13,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.team.DarienOpMode;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import java.util.ArrayList;
 
 /**
  * Pedro Pathing auto using LinearOpMode via DarienOpMode.
@@ -172,6 +175,8 @@ public class BlueGoalSide1 extends DarienOpMode {
                 //setTrayPosition(TRAY_POS_2_SCORE);
                 servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
 
+                // Start AprilTag reading here while driving Path1
+                tagFSM.start(getRuntime());
 
                 // Start first path ONCE
                 follower.followPath(paths.Path1);
@@ -179,13 +184,15 @@ public class BlueGoalSide1 extends DarienOpMode {
                 break;
 
             case 1:
-                telemetry.addLine("Case " + pathState + ": Wait for Path1, then start Path2");
+                telemetry.addLine("Case " + pathState + ": Wait for Path1 and camera, then start Path2");
 
-                // TODO: Start AprilTag reading here while driving Path1
+                tagFSM.update(getRuntime(), true, telemetry);
 
-                if (!follower.isBusy()
-                        && pathTimer.getElapsedTimeSeconds() > 5.0 // Wait for the camera to read the AprilTag
+                if ((!follower.isBusy() && tagFSM.isDone())
+                        || pathTimer.getElapsedTimeSeconds() > 4.0
                 ) {
+                    aprilTagDetections = tagFSM.getDetections();
+
                     telemetry.addLine("Case " + pathState + ": exiting");
                     follower.followPath(paths.Path2);
                     setPathState(pathState + 1);
@@ -194,7 +201,7 @@ public class BlueGoalSide1 extends DarienOpMode {
 
             case 2:
                 telemetry.addLine("Case " + pathState + ": Wait for Path2, then shoot artifact");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.0) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": exiting");
                     setPathState(pathState + 1);
                 }
@@ -203,7 +210,8 @@ public class BlueGoalSide1 extends DarienOpMode {
             case 3:
                 telemetry.addLine("Case " + pathState + ": start shooting");
 
-                startShooting();
+                //startShooting();
+                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
 
                 if (pathTimer.getElapsedTimeSeconds() > 1.0) {
                     setPathState(pathState + 1);
@@ -212,16 +220,16 @@ public class BlueGoalSide1 extends DarienOpMode {
 
             case 4:
                 telemetry.addLine("Case " + pathState + ": updateShooting...");
-                updateShooting(1);
-                // TODO: Shoot all 3 artifacts before proceeding
+                //updateShooting(1);
+                shootPatternFSM.updateShootPattern(getRuntime());
 
-                if (shootingDone() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    resetShooting();
+                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 12.0) {
+                    //resetShooting();
                     //setBreakpoint();
 
                     rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
-                    //setTrayPosition(TRAY_POS_2_INTAKE);
-                    servoIncremental(TrayServo, TRAY_POS_2_INTAKE, currentTrayPosition, 1, 4);
+                    //setTrayPosition(TRAY_POS_1_INTAKE);
+                    servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
 
 
                     // now continue with next path
