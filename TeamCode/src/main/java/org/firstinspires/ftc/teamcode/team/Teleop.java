@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp(name = "Teleop", group = "DriverControl")
 @Config
 public class Teleop extends DarienOpModeTeleop {
+    boolean isRubberBandsReversed = false;
     // tuning constants for gobilda 117 rpm motor
 
     // tuning constants for gobilda 312 rpm motor and 4 stage long gobilda viper slide
@@ -45,11 +46,13 @@ public class Teleop extends DarienOpModeTeleop {
           //assigning the ejectionmotorleft/right controls
             if (gamepad1.y) {
                 rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
+                isRubberBandsReversed = false;
             } else if (gamepad1.a) {
                 rubberBands.setPower(OUTPUT_RUBBER_BANDS_POWER);
-                // TODO: stop the intake servo from lifting.
+                isRubberBandsReversed = true;
             } else if (gamepad1.x) {
                 rubberBands.setPower(0);
+                isRubberBandsReversed = false;
             }
 
            if (gamepad2.back) {
@@ -102,7 +105,7 @@ public class Teleop extends DarienOpModeTeleop {
                     .addData("Blue", "%.3f", colors.blue);
             if (intakeColorSensor instanceof DistanceSensor) {
                 telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
-                if (((DistanceSensor)intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime()-startTimeColor) >= 1){
+                if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && isRubberBandsReversed == false) {
                     startTimeColor = getRuntime();
                     servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1,1);
                 }
