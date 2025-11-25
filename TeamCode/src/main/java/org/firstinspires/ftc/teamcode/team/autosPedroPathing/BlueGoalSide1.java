@@ -15,9 +15,9 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
 
 /**
- * Pedro Pathing auto using LinearOpMode via DarienOpMode.
+ * Pedro Pathing auto using LinearOpMode via DarienOpModeFSM.
  */
-@Autonomous(name = "BlueGoalSidePedro", group = "Autonomous")
+@Autonomous(name = "BlueGoalSidePedro", group = "Pedro:Blues", preselectTeleOp = "Teleop")
 @Configurable
 public class BlueGoalSide1 extends DarienOpModeFSM {
 
@@ -30,7 +30,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        // --- ROBOT + HARDWARE INIT (from DarienOpMode) ---
+        // --- ROBOT + HARDWARE INIT (from DarienOpModeFSM) ---
         initControls(); // sets up TrayServo, Elevator, Feeder, motors, AprilTag, etc.
 
         // --- PEDRO + TIMERS INIT ---
