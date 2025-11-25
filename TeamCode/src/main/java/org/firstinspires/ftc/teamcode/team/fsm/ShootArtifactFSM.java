@@ -39,26 +39,28 @@ public class ShootArtifactFSM {
             return;
         }
 
-        double elapsed = opMode.getRuntime() - shootingStartTime;
+        double currentTime = opMode.getRuntime();
 
         switch (shootingStage) {
 
             case ELEVATOR_UP:
-                if (elapsed >= STAGE1_DELAY) {
+                if (currentTime - shootingStartTime >= STAGE1_DELAY) {
                     shotGun(DarienOpModeFSM.SHOT_GUN_POWER_UP * shootingPower);
                     shootingStage = ShootingStage.SHOTGUN_SPINUP;
+                    shootingStartTime = currentTime; // Reset timer for next stage
                 }
                 break;
 
             case SHOTGUN_SPINUP:
-                if (elapsed >= STAGE1_DELAY + STAGE2_DELAY) {
+                if (currentTime - shootingStartTime >= STAGE2_DELAY) {
                     opMode.Feeder.setPosition(DarienOpModeFSM.FEEDER_POS_UP);
                     shootingStage = ShootingStage.FEEDER_UP;
+                    shootingStartTime = currentTime; // Reset timer for next stage
                 }
                 break;
 
             case FEEDER_UP:
-                if (elapsed >= STAGE1_DELAY + STAGE2_DELAY + STAGE3_DELAY) {
+                if (currentTime - shootingStartTime >= STAGE3_DELAY) {
                     shotGunStop();
                     opMode.Feeder.setPosition(DarienOpModeFSM.FEEDER_POS_DOWN);
                     opMode.Elevator.setPosition(DarienOpModeFSM.ELEVATOR_POS_DOWN);
