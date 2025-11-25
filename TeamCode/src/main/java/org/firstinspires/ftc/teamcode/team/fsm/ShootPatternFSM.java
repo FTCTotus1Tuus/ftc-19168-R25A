@@ -1,16 +1,17 @@
 package org.firstinspires.ftc.teamcode.team.fsm;
 
-import org.firstinspires.ftc.teamcode.team.DarienOpMode;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
 public class ShootPatternFSM {
 
-    private DarienOpMode opMode;
+    private final DarienOpModeFSM opMode;
+    private final ShootArtifactFSM shootArtifactFSM;
 
-    public ShootPatternFSM(DarienOpMode opMode) {
+    public ShootPatternFSM(DarienOpModeFSM opMode) {
         this.opMode = opMode;
+        this.shootArtifactFSM = new ShootArtifactFSM(opMode);
     }
 
     private ArrayList<AprilTagDetection> aprilTagDetections;
@@ -19,6 +20,7 @@ public class ShootPatternFSM {
     private double nbLastActionTime = 0;
     private boolean nbShootingActive = false;
     private double shootPower = 1;
+    private boolean shotStarted = false;
 
     public void startShootPattern(ArrayList<AprilTagDetection> detections, double currentTime, double shootingPower) {
         aprilTagDetections = detections;
@@ -53,13 +55,14 @@ public class ShootPatternFSM {
 
         switch (nbStep) {
             case 0: // Move tray
-                double targetPos = (motif[nbMotifIndex] == 1) ? opMode.TRAY_POS_1_SCORE :
-                        (motif[nbMotifIndex] == 2) ? opMode.TRAY_POS_2_SCORE :
-                                opMode.TRAY_POS_3_SCORE;
+                double targetPos = (motif[nbMotifIndex] == 1) ? DarienOpModeFSM.TRAY_POS_1_SCORE :
+                        (motif[nbMotifIndex] == 2) ? DarienOpModeFSM.TRAY_POS_2_SCORE :
+                                DarienOpModeFSM.TRAY_POS_3_SCORE;
                 opMode.servoIncremental(opMode.TrayServo, targetPos, opMode.currentTrayPosition, 1, 4);
                 opMode.currentTrayPosition = targetPos;
                 nbLastActionTime = currentTime;
                 nbStep = 1;
+                shotStarted = false; // Reset for next shot
                 break;
             case 1: // Wait for tray move
                 if (currentTime - nbLastActionTime >= 1.0) {
@@ -67,15 +70,15 @@ public class ShootPatternFSM {
                     nbStep = 2;
                 }
                 break;
-            case 2: // Shoot
-                opMode.startShooting();
-                nbLastActionTime = currentTime;
-                nbStep = 3;
-                break;
-            case 3: // Wait after shoot
-                opMode.updateShooting(shootPower);
-                if (opMode.shootingDone() || currentTime - nbLastActionTime >= 2.0) {
-                    opMode.resetShooting();
+            case 2: // Shoot and wait for completion
+                if (!shotStarted) {
+                    shootArtifactFSM.startShooting();
+                    shotStarted = true;
+                    nbLastActionTime = currentTime;
+                }
+                shootArtifactFSM.updateShooting(shootPower);
+                if (shootArtifactFSM.shootingDone() || currentTime - nbLastActionTime >= 2.0) {
+                    shootArtifactFSM.resetShooting();
                     nbMotifIndex++;
                     nbStep = 0;
                 }
@@ -86,6 +89,5 @@ public class ShootPatternFSM {
     public boolean isShootPatternDone() {
         return !nbShootingActive;
     }
-
 
 }

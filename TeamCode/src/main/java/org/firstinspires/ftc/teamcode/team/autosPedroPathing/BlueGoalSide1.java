@@ -12,17 +12,14 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.team.DarienOpMode;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-
-import java.util.ArrayList;
+import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
 
 /**
  * Pedro Pathing auto using LinearOpMode via DarienOpMode.
  */
 @Autonomous(name = "BlueGoalSidePedro", group = "Autonomous")
 @Configurable
-public class BlueGoalSide1 extends DarienOpMode {
+public class BlueGoalSide1 extends DarienOpModeFSM {
 
     private TelemetryManager panelsTelemetry;   // Panels Telemetry instance
     public Follower follower;                   // Pedro Pathing follower instance
@@ -172,8 +169,8 @@ public class BlueGoalSide1 extends DarienOpMode {
                 telemetry.addLine("Case " + pathState + ": Start Path1");
 
                 // Set the initial tray position
-                //setTrayPosition(TRAY_POS_2_SCORE);
-                servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+                setTrayPosition(TRAY_POS_2_SCORE);
+                //servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
 
                 // Start AprilTag reading here while driving Path1
                 tagFSM.start(getRuntime());
@@ -228,8 +225,8 @@ public class BlueGoalSide1 extends DarienOpMode {
                     //setBreakpoint();
 
                     rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
-                    //setTrayPosition(TRAY_POS_1_INTAKE);
-                    servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
+                    setTrayPosition(TRAY_POS_1_INTAKE);
+                    //servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
 
 
                     // now continue with next path
