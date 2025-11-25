@@ -16,8 +16,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.team.fsm.AprilTagDetectionFSM;
-import org.firstinspires.ftc.teamcode.team.fsm.ShootPatternFSM;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -27,12 +25,7 @@ import java.util.ArrayList;
 @Config
 public class DarienOpMode extends LinearOpMode {
 
-    // FINITE STATE MACHINES (FSM)
-    public AprilTagDetectionFSM tagFSM;
-    public ShootPatternFSM shootPatternFSM;
-
     // AprilTag
-    public ArrayList<AprilTagDetection> aprilTagDetections;
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal = null;        // Used to manage the video source.
     // telemetry
@@ -139,12 +132,8 @@ public class DarienOpMode extends LinearOpMode {
         omniMotor3.setDirection(DcMotor.Direction.FORWARD);
 
         initAprilTag();
-        tagFSM = new AprilTagDetectionFSM(aprilTag, TIMEOUT_APRILTAG_DETECTION);
-
-        shootPatternFSM = new ShootPatternFSM(this);
 
         startTimeIntakeColorSensor = getRuntime();
-
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
         telemetry.update();
     }
@@ -190,106 +179,6 @@ public class DarienOpMode extends LinearOpMode {
      Elevator.setPosition(ELEVATOR_POS_DOWN);
     }
 
-    public void setBreakpoint() {
-        while (!gamepad1.x) {
-        }
-    }
-
-    // ===============================
-//   SHOOTING STATE MACHINE
-// ===============================
-
-    public enum ShootingStage {
-        IDLE,
-        ELEVATOR_UP,
-        SHOTGUN_SPINUP,
-        FEEDER_UP,
-        FINISHED
-    }
-
-    private ShootingStage shootingStage = ShootingStage.IDLE;
-    private double shootingStartTime = 0;
-
-    // Timings (seconds)
-    private static final double STAGE1_DELAY = .100;    // elevator up -> shotgun start
-    private static final double STAGE2_DELAY = .600;    // shotgun running before feeder
-    private static final double STAGE3_DELAY = .500;    // feeder up while spinning
-
-    // Call this to begin shooting
-    public void startShooting() {
-        shootingStage = ShootingStage.ELEVATOR_UP;
-        shootingStartTime = getRuntime();
-
-        Elevator.setPosition(ELEVATOR_POS_UP);
-    }
-
-    // Call this inside loop() or inside your main auto while-loop
-    public void updateShooting(double shootingPower) {
-        if (shootingStage == ShootingStage.IDLE ||
-                shootingStage == ShootingStage.FINISHED) {
-            return;
-        }
-
-        double elapsed = getRuntime() - shootingStartTime;
-
-        switch (shootingStage) {
-
-            case ELEVATOR_UP:
-                if (elapsed >= STAGE1_DELAY) {
-                    shotGun(SHOT_GUN_POWER_UP * shootingPower);
-                    shootingStage = ShootingStage.SHOTGUN_SPINUP;
-                }
-                break;
-
-            case SHOTGUN_SPINUP:
-                if (elapsed >= STAGE1_DELAY + STAGE2_DELAY) {
-                    Feeder.setPosition(FEEDER_POS_UP);
-                    shootingStage = ShootingStage.FEEDER_UP;
-                }
-                break;
-
-            case FEEDER_UP:
-                if (elapsed >= STAGE1_DELAY + STAGE2_DELAY + STAGE3_DELAY) {
-                    shotGunStop();
-                    Feeder.setPosition(FEEDER_POS_DOWN);
-                    Elevator.setPosition(ELEVATOR_POS_DOWN);
-                    shootingStage = ShootingStage.FINISHED;
-                }
-                break;
-        }
-    }
-
-    // Use this to check if it is done
-    public boolean shootingDone() {
-        return shootingStage == ShootingStage.FINISHED;
-    }
-
-    // If you want a hard reset:
-    public void resetShooting() {
-        shootingStage = ShootingStage.IDLE;
-    }
-
-    /**
-     * Set the tray position and update the currentTrayPosition variable.
-     *
-     * @param position The desired position for the tray servo.
-     */
-    public void setTrayPosition(double position) {
-        TrayServo.setPosition(position);
-        currentTrayPosition = position;
-    }
-
-    public void runIntakeLifterWithColorSensor() {
-        if (intakeColorSensor instanceof DistanceSensor) {
-            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1) {
-                startTimeIntakeColorSensor = getRuntime();
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1, 1);
-            } else {
-                IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
-            }
-        }
-    }
-
     public void print(String Name, Object message) {
         //saves a line for quick debug messages
         telemetry.addData(Name, message);
@@ -325,7 +214,6 @@ public class DarienOpMode extends LinearOpMode {
                 currentPos = ((startPos - endPos) / (endDuration - (currentTime - startTime))) * (currentTime - startTime) + endPos;
             }
             servo.setPosition(currentPos/divisor);
-            currentTrayPosition = currentPos / divisor;
             /*
             if (currentTime - Last_Time >= 0.240 ){
                 servo.setPosition(currentPos);
