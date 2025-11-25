@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.team.autos;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.team.DarienOpModeAuto;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 
+@Disabled
 @Autonomous(name = "Blue Audience 1", group = "Blues", preselectTeleOp = "Teleop")
 @Config
 public class BlueAudience1 extends DarienOpModeAuto {
