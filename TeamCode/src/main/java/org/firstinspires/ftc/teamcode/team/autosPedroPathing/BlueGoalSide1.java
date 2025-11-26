@@ -93,7 +93,10 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
         public PathChain Path4;
         public PathChain Path5;
         public PathChain Path6;
+        public PathChain Path7;
+        public PathChain Path8;
 
+        // 67
         public Paths(Follower follower) {
             Path1 = follower
                     .pathBuilder()
@@ -107,18 +110,16 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     .pathBuilder()
                     .addPath(
                             new BezierLine(
-                                    new Pose(47.224, 96.443, Math.toRadians(70)),   // Start pose with initial heading
-                                    new Pose(47.234, 96.443, Math.toRadians(145))   // End pose with target heading
-                            )
+                                    new Pose(47.224, 96.443, Math.toRadians(70)),
+                                    new Pose(47.234, 96.443, Math.toRadians(145)))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(70), Math.toRadians(145))
                     .build();
 
-
             Path3 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(47.224, 96.443), new Pose(42.069, 86.799))
+                            new BezierLine(new Pose(43.732, 96.443), new Pose(40.739, 84.305))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(145), Math.toRadians(180))
                     .build();
@@ -126,7 +127,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
             Path4 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(42.069, 86.799), new Pose(35.085, 86.799))
+                            new BezierLine(new Pose(38.599, 84.305), new Pose(28.933, 84.305))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -134,21 +135,37 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
             Path5 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierCurve(
-                                    new Pose(35.085, 86.799),
-                                    new Pose(39.409, 85.136),
-                                    new Pose(47.224, 96.443)
-                            )
+                            new BezierLine(new Pose(33.555, 84.305), new Pose(23.446, 84.305))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(135))
+                    .setTangentHeadingInterpolation()
                     .build();
 
             Path6 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(47.224, 96.443), new Pose(47.390, 121.552))
+                            new BezierLine(new Pose(30.555, 84.305), new Pose(17.792, 84.305))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(135), Math.toRadians(90))
+                    .setTangentHeadingInterpolation()
+                    .build();
+
+            Path7 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(17.792, 84.305),
+                                    new Pose(38.910, 86.965),
+                                    new Pose(47.224, 96.443)
+                            )
+                    )
+                    .setTangentHeadingInterpolation()
+                    .build();
+
+            Path8 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(new Pose(47.224, 96.443), new Pose(47.557, 122.383))
+                    )
+                    .setTangentHeadingInterpolation()
                     .build();
         }
     }
@@ -169,11 +186,9 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": Start Path1");
 
                 // Set the initial tray position
-                setTrayPosition(TRAY_POS_2_SCORE);
+                setTrayPosition(TRAY_POS_1_SCORE);
                 //servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
 
-                // Start AprilTag reading here while driving Path1
-                tagFSM.start(getRuntime());
 
                 // Start first path ONCE
                 follower.followPath(paths.Path1);
@@ -181,13 +196,24 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 break;
 
             case 1:
-                telemetry.addLine("Case " + pathState + ": Wait for Path1 and camera, then start Path2");
+                telemetry.addLine("Case " + pathState + ": Wait for Path1 and camera, then start read AprilTag");
+
+                if ((!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.0)) {
+
+                    telemetry.addLine("Case " + pathState + ": exiting");
+                    // Start AprilTag reading after path1 is done
+                    tagFSM.start(getRuntime());
+
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 2:
+                telemetry.addLine("Case " + pathState + ": Read AprilTag then start Path2");
 
                 tagFSM.update(getRuntime(), true, telemetry);
 
-                if ((!follower.isBusy() && tagFSM.isDone())
-                        || pathTimer.getElapsedTimeSeconds() > 4.0
-                ) {
+                if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 4.0) {
                     aprilTagDetections = tagFSM.getDetections();
 
                     telemetry.addLine("Case " + pathState + ": exiting");
@@ -196,7 +222,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 }
                 break;
 
-            case 2:
+            case 3:
                 telemetry.addLine("Case " + pathState + ": Wait for Path2, then shoot artifact");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": exiting");
@@ -204,7 +230,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 }
                 break;
 
-            case 3:
+            case 4:
                 telemetry.addLine("Case " + pathState + ": start shooting");
 
                 //startShooting();
@@ -215,7 +241,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 }
                 break;
 
-            case 4:
+            case 5:
                 telemetry.addLine("Case " + pathState + ": updateShooting...");
                 //updateShooting(1);
                 shootPatternFSM.updateShootPattern(getRuntime());
@@ -235,20 +261,45 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 }
                 break;
 
-            case 5:
+            case 6:
                 telemetry.addLine("Case " + pathState + ": Wait for Path3, then start Path4");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 4.0) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact");
 
-                    follower.setMaxPower(0.3); //slow down for pickup
+                    follower.setMaxPower(0.2); //slow down for pickup
 
                     //setBreakpoint();
                     follower.followPath(paths.Path4, true);
+                    setTrayPosition(TRAY_POS_2_INTAKE);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 7:
+                telemetry.addLine("Case " + pathState + ": Wait for Path3, then start Path4");
+                if (pathTimer.getElapsedTimeSeconds() > 2.0) {
+                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact");
+
+                    //setBreakpoint();
+                    follower.followPath(paths.Path5, true);
+                    setTrayPosition(TRAY_POS_3_INTAKE);
+                    rubberBands.setPower(0);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 8:
+                telemetry.addLine("Case " + pathState + ": Wait for Path3, then start Path4");
+                if (pathTimer.getElapsedTimeSeconds() > 2.0) {
+                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact");
+
+                    //setBreakpoint();
+                    follower.followPath(paths.Path6, true);
                     setPathState(pathState + 1);
                 }
                 break;
             /*
-            case 6:
+            case 9:
                 telemetry.addLine("Case " + pathState + ": Wait for Path4 to pick up artifact, then start Path5");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
@@ -256,22 +307,22 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     follower.setMaxPower(0.8); //resume normal speed
 
                     //setBreakpoint();
-                    follower.followPath(paths.Path5, true);
+                    follower.followPath(paths.Path7, true);
                     setPathState(pathState + 1);
                 }
                 break;
 
-            case 7:
+            case 10:
                 telemetry.addLine("Case " + pathState + ": Wait for Path5 to get into position, then start Path6");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to Path6");
                     //setBreakpoint();
-                    follower.followPath(paths.Path6, true);
+                    follower.followPath(paths.Path8, true);
                     setPathState(pathState + 1);
                 }
                 break;
 
-            case 8:
+            case 11:
                 telemetry.addLine("Case " + pathState + ": Wait for Path6 to finish, then stop");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Done, setting state -1");
