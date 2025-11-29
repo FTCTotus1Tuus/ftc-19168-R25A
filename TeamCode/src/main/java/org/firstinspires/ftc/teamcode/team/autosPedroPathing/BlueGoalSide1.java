@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
 /**
  * Pedro Pathing auto using LinearOpMode via DarienOpModeFSM.
  */
-@Autonomous(name = "BlueGoalSidePedro", group = "Pedro:Blues", preselectTeleOp = "Teleop")
+@Autonomous(name = "BlueGoalSidePedro v2", group = "Pedro:Blues", preselectTeleOp = "Teleop")
 @Configurable
 public class BlueGoalSide1 extends DarienOpModeFSM {
 
@@ -150,12 +150,12 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(17.792, 84.305),
-                                    new Pose(38.910, 86.965),
-                                    new Pose(47.224, 96.443)
+                                    new Pose(17.792, 87.305),
+                                    new Pose(44.564, 103.926),
+                                    new Pose(47.557, 119.383)
                             )
                     )
-                    .setTangentHeadingInterpolation()
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(157))
                     .build();
 
             Path8 = follower
@@ -187,7 +187,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 setTrayPosition(TRAY_POS_1_SCORE);
                 //servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
 
-
+                // HI SEBASTIAN
                 // Start first path ONCE
                 follower.followPath(paths.Path1);
                 setPathState(pathState + 1);
@@ -303,12 +303,11 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 break;
 
             case 9:
-                telemetry.addLine("Case " + pathState + ": Wait for Path4 to pick up artifact, then start Path5");
+                telemetry.addLine("Case " + pathState + ": Wait for Path6 to pick up artifact, then start Path7");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
 
                     follower.setMaxPower(0.8); //resume normal speed
-
                     //setBreakpoint();
                     follower.followPath(paths.Path7, true);
                     rubberBands.setPower(0);
@@ -317,18 +316,20 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 break;
 
             case 10:
-                telemetry.addLine("Case " + pathState + ": Wait for Path5 to get into position, then start Path6");
+                telemetry.addLine("Case " + pathState + ": Wait for Path7 to get into position, then start Path8");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
-                    telemetry.addLine("Case " + pathState + ": Moving to Path6");
+                    telemetry.addLine("Case " + pathState + ": Shoot the pattern");
                     //setBreakpoint();
-                    follower.followPath(paths.Path8, true);
+                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
                     setPathState(pathState + 1);
                 }
                 break;
 
             case 11:
                 telemetry.addLine("Case " + pathState + ": Wait for Path6 to finish, then stop");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                shootPatternFSM.updateShootPattern(getRuntime());
+                if (shootPatternFSM.isShootPatternDone()) {
+
                     telemetry.addLine("Case " + pathState + ": Done, setting state -1");
                     rubberBands.setPower(0);
                     setPathState(-1); // done

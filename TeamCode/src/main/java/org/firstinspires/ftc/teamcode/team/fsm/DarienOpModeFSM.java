@@ -138,9 +138,9 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
     public void runIntakeLifterWithColorSensor() {
         if (intakeColorSensor instanceof DistanceSensor) {
-            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1) {
+            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1.5) {
                 startTimeIntakeColorSensor = getRuntime();
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1, 1);
+                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1.5, 1);
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
