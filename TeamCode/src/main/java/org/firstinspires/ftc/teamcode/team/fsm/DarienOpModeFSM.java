@@ -82,6 +82,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     @Override
     public abstract void runOpMode() throws InterruptedException;
 
+    public ServoIncrementalFSM servoIncrementalFSM;
+
     public void initControls() {
 
         // INITIALIZE SENSORS
@@ -119,6 +121,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
         tagFSM = new AprilTagDetectionFSM(aprilTag, TIMEOUT_APRILTAG_DETECTION);
         shootPatternFSM = new ShootPatternFSM(this);
 
+        servoIncrementalFSM = new ServoIncrementalFSM();
+
         startTimeIntakeColorSensor = getRuntime();
 
         telemetry.addLine("FTC 19168 Robot Initialization Done!");
@@ -140,10 +144,13 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
         if (intakeColorSensor instanceof DistanceSensor) {
             if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1.5) {
                 startTimeIntakeColorSensor = getRuntime();
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1.5, 1);
+                servoIncrementalFSM.start(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1.5, getRuntime());
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
+        }
+        if (servoIncrementalFSM.isRunning()) {
+            servoIncrementalFSM.update(getRuntime());
         }
     }
 
@@ -201,4 +208,3 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     }
 
 }
-
