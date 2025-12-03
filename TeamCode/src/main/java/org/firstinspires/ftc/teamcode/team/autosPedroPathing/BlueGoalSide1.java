@@ -202,10 +202,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
                 // Set the initial tray position
                 setTrayPosition(TRAY_POS_1_SCORE);
-                //servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
-
-                // HI SEBASTIAN
-                // Start first path ONCE
                 follower.followPath(paths.Path1);
                 setPathState(pathState + 1);
                 break;
@@ -248,7 +244,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
             case 4:
                 telemetry.addLine("Case " + pathState + ": start shooting");
 
-                //startShooting();
                 shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
 
                 if (pathTimer.getElapsedTimeSeconds() > 1.0) {
@@ -258,17 +253,11 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 5:
                 telemetry.addLine("Case " + pathState + ": updateShooting...");
-                //updateShooting(1);
                 shootPatternFSM.updateShootPattern(getRuntime());
 
                 if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 12.0) {
-                    //resetShooting();
-                    //setBreakpoint();
 
                     rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
-                    //setTrayPosition(TRAY_POS_1_INTAKE);
-                    //servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
-                    //currentTrayPosition = TRAY_POS_1_INTAKE;
 
                     // now continue with next path
                     follower.followPath(paths.Path3, true);
@@ -283,7 +272,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
                     follower.setMaxPower(0.175); //slow down for pickup
 
-                    //setBreakpoint();
                     setTrayPosition(TRAY_POS_1_INTAKE);
                     follower.followPath(paths.Path4, true);
                     setPathState(pathState + 1);
@@ -295,7 +283,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4.0) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 2p");
 
-                    //setBreakpoint();
                     setTrayPosition(TRAY_POS_3_INTAKE);
                     follower.followPath(paths.Path5, true);
                     setPathState(pathState + 1);
@@ -307,7 +294,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.0) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 3g");
 
-                    //setBreakpoint();
                     setTrayPosition(TRAY_POS_2_INTAKE);
                     follower.followPath(paths.Path6, true);
                     setPathState(pathState + 1);
@@ -320,7 +306,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
 
                     follower.setMaxPower(0.8); //resume normal speed
-                    //setBreakpoint();
                     follower.followPath(paths.Path7, true);
                     rubberBands.setPower(0);
                     setPathState(pathState + 1);
@@ -331,7 +316,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": Wait for Path7 to get into position, then start Path8");
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Shoot the pattern");
-                    //setBreakpoint();
                     shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
                     setPathState(pathState + 1);
                 }
