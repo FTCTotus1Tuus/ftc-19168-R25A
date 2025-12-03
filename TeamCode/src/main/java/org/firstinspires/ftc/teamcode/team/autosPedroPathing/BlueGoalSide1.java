@@ -60,6 +60,9 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
         opmodeTimer.resetTimer();
         setPathState(0);
 
+        // Set the initial tray position immediately.
+        setTrayPosition(TRAY_POS_1_SCORE);
+
         // --- MAIN AUTONOMOUS LOOP ---
         while (opModeIsActive() && !isStopRequested()) {
 
@@ -71,11 +74,25 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             runIntakeLifterWithColorSensor();
 
+            /*
+            // Update tray servo FSM if running
+            if (trayServoFSM.isRunning()) {
+                trayServoFSM.update(getRuntime());
+                if (!trayServoFSM.isRunning()) {
+                    // Update current tray position when done
+                    currentTrayPosition = targetTrayPosition;
+                }
+            }
+
+             */
+
             // Panels/driver telemetry
-            panelsTelemetry.debug("Path State", pathState);
-            panelsTelemetry.debug("X", follower.getPose().getX());
-            panelsTelemetry.debug("Y", follower.getPose().getY());
-            panelsTelemetry.debug("Heading", follower.getPose().getHeading());
+            panelsTelemetry.addData("Tray Curr", currentTrayPosition);
+            //panelsTelemetry.addData("Tray Targ", targetTrayPosition);
+            panelsTelemetry.addData("Path State", pathState);
+            panelsTelemetry.addData("X", follower.getPose().getX());
+            panelsTelemetry.addData("Y", follower.getPose().getY());
+            panelsTelemetry.addData("Heading", follower.getPose().getHeading());
             panelsTelemetry.update(telemetry);
 
             telemetry.update();
@@ -267,10 +284,8 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     follower.setMaxPower(0.175); //slow down for pickup
 
                     //setBreakpoint();
-                    servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
-                    currentTrayPosition = TRAY_POS_1_INTAKE;
+                    setTrayPosition(TRAY_POS_1_INTAKE);
                     follower.followPath(paths.Path4, true);
-                    //setTrayPosition(TRAY_POS_2_INTAKE);
                     setPathState(pathState + 1);
                 }
                 break;
@@ -281,10 +296,8 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 2p");
 
                     //setBreakpoint();
-                    servoIncremental(TrayServo, TRAY_POS_3_INTAKE, currentTrayPosition, 1, 4);
-                    currentTrayPosition = TRAY_POS_3_INTAKE;
+                    setTrayPosition(TRAY_POS_3_INTAKE);
                     follower.followPath(paths.Path5, true);
-                    //setTrayPosition(TRAY_POS_3_INTAKE);
                     setPathState(pathState + 1);
                 }
                 break;
@@ -295,8 +308,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 3g");
 
                     //setBreakpoint();
-                    servoIncremental(TrayServo, TRAY_POS_2_INTAKE, currentTrayPosition, 1, 4);
-                    currentTrayPosition = TRAY_POS_2_INTAKE;
+                    setTrayPosition(TRAY_POS_2_INTAKE);
                     follower.followPath(paths.Path6, true);
                     setPathState(pathState + 1);
                 }

@@ -59,6 +59,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double INTAKE_DISTANCE = 5;
     public static final double INTAKE_SERVO_POS_UP = 0.75;
     public static final double INTAKE_SERVO_POS_DOWN = 0.21;
+    public static double INTAKE_SERVO_DURATION_RAISE = 1.5; // seconds
+    public static double TRAY_SERVO_DURATION_ROTATE = 1.5; // seconds
     public static final double TRAY_POS_1_INTAKE = 0.23;
     public static final double TRAY_POS_2_INTAKE = 0.8;
     public static final double TRAY_POS_3_INTAKE = 0.54;
@@ -76,13 +78,15 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
     public double IntakeServoPosition = 0;
     public double currentTrayPosition;
+    //public double targetTrayPosition = 0.0;
     private double startTimeIntakeColorSensor;
 
     // Abstract method for child classes to implement
     @Override
     public abstract void runOpMode() throws InterruptedException;
 
-    public ServoIncrementalFSM servoIncrementalFSM;
+    public ServoIncrementalFSM intakeServoFSM;
+    //public ServoIncrementalFSM trayServoFSM;
 
     public void initControls() {
 
@@ -121,7 +125,9 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
         tagFSM = new AprilTagDetectionFSM(aprilTag, TIMEOUT_APRILTAG_DETECTION);
         shootPatternFSM = new ShootPatternFSM(this);
 
-        servoIncrementalFSM = new ServoIncrementalFSM();
+        intakeServoFSM = new ServoIncrementalFSM(IntakeServo);
+        //trayServoFSM = new ServoIncrementalFSM(TrayServo);
+        //currentTrayPosition = 0.5;
 
         startTimeIntakeColorSensor = getRuntime();
 
@@ -133,24 +139,40 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
      * Set the tray position and update the currentTrayPosition variable.
      *
      * @param position The desired position for the tray servo.
+     * @param duration The duration over which to move the tray servo to the desired position.
+     */
+    public void setTrayPosition(double position, double duration) {
+        //TrayServo.setPosition(position);
+        servoIncremental(TrayServo, position, currentTrayPosition, duration, 4);
+        currentTrayPosition = position;
+        /*
+        if (!trayServoFSM.isRunning()) {
+            targetTrayPosition = position;
+            trayServoFSM.start(position, currentTrayPosition, duration, getRuntime());
+        }
+         */
+    }
+
+    /**
+     * Set the tray position with a default duration in seconds.
+     *
+     * @param position The desired position for the tray servo.
      */
     public void setTrayPosition(double position) {
-        //TrayServo.setPosition(position);
-        servoIncremental(TrayServo, position, currentTrayPosition, 1, 4);
-        currentTrayPosition = position;
+        setTrayPosition(position, TRAY_SERVO_DURATION_ROTATE);
     }
 
     public void runIntakeLifterWithColorSensor() {
         if (intakeColorSensor instanceof DistanceSensor) {
-            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= 1.5) {
+            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= INTAKE_SERVO_DURATION_RAISE) {
                 startTimeIntakeColorSensor = getRuntime();
-                servoIncrementalFSM.start(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1.5, getRuntime());
+                intakeServoFSM.start(INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_SERVO_DURATION_RAISE, getRuntime());
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
         }
-        if (servoIncrementalFSM.isRunning()) {
-            servoIncrementalFSM.update(getRuntime());
+        if (intakeServoFSM.isRunning()) {
+            intakeServoFSM.update(getRuntime());
         }
     }
 
