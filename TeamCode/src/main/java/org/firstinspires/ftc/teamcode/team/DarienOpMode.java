@@ -69,12 +69,12 @@ public class DarienOpMode extends LinearOpMode {
 
     public static double INTAKE_SERVO_POS_UP = 0.75;
     public static double INTAKE_SERVO_POS_DOWN = 0.21;
-    public static double TRAY_POS_1_INTAKE = 0.23;
-    public static double TRAY_POS_2_INTAKE = 0.8;
-    public static double TRAY_POS_3_INTAKE = 0.54;
-    public static double TRAY_POS_1_SCORE = .67;
-    public static double TRAY_POS_2_SCORE = 0.38;
-    public static double TRAY_POS_3_SCORE = 0.08;
+    public static double TRAY_POS_1_INTAKE = 0.275;
+    public static double TRAY_POS_2_INTAKE = 0.205;
+    public static double TRAY_POS_3_INTAKE = 0.350;
+    public static double TRAY_POS_1_SCORE = 0.385;
+    public static double TRAY_POS_2_SCORE = 0.310;
+    public static double TRAY_POS_3_SCORE = 0.240;
     double IntakeServoPosition = 0;
     double startTimeIntakeServo = 0;
     boolean isIntakeServoMoving = false;
@@ -241,6 +241,18 @@ public class DarienOpMode extends LinearOpMode {
         }
         //sleep(3000);
     }
+
+    /**
+     * Set the tray position and update the currentTrayPosition variable.
+     *
+     * @param position The desired position for the tray servo.
+     * @param duration The duration over which to move the tray servo to the desired position.
+     */
+    public void setTrayPosition(double position) {
+        TrayServo.setPosition(position);
+        currentTrayPosition = position;
+    }
+
 
     /**
      * Initialize the AprilTag processor.

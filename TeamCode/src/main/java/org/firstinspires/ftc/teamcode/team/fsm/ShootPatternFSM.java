@@ -58,8 +58,9 @@ public class ShootPatternFSM {
                 double targetPos = (motif[nbMotifIndex] == 1) ? DarienOpModeFSM.TRAY_POS_1_SCORE :
                         (motif[nbMotifIndex] == 2) ? DarienOpModeFSM.TRAY_POS_2_SCORE :
                                 DarienOpModeFSM.TRAY_POS_3_SCORE;
-                opMode.servoIncremental(opMode.TrayServo, targetPos, opMode.currentTrayPosition, 1, 4);
-                opMode.currentTrayPosition = targetPos;
+                //opMode.servoIncremental(opMode.TrayServo, targetPos, opMode.currentTrayPosition, 1, 4);
+                //opMode.currentTrayPosition = targetPos;
+                opMode.setTrayPosition(targetPos);
                 nbLastActionTime = currentTime;
                 nbStep = 1;
                 shotStarted = false; // Reset for next shot

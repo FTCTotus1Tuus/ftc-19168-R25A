@@ -224,7 +224,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
                 tagFSM.update(getRuntime(), true, telemetry);
 
-                if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 4.0) {
+                if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 2.67) {
                     aprilTagDetections = tagFSM.getDetections();
 
                     telemetry.addLine("Case " + pathState + ": exiting");
@@ -235,7 +235,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 3:
                 telemetry.addLine("Case " + pathState + ": Wait for Path2, then shoot artifact");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.5) {
                     telemetry.addLine("Case " + pathState + ": exiting");
                     setPathState(pathState + 1);
                 }
@@ -255,7 +255,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": updateShooting...");
                 shootPatternFSM.updateShootPattern(getRuntime());
 
-                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 12.0) {
+                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 10.0) {
 
                     rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
 
@@ -280,7 +280,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 7:
                 telemetry.addLine("Case " + pathState + ": Wait for Path4");
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4.0) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4.2) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 2p");
 
                     setTrayPosition(TRAY_POS_3_INTAKE);
@@ -291,7 +291,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 8:
                 telemetry.addLine("Case " + pathState + ": Wait for Path5");
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.0) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.3) {
                     telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 3g");
 
                     setTrayPosition(TRAY_POS_2_INTAKE);
@@ -307,6 +307,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
                     follower.setMaxPower(0.8); //resume normal speed
                     follower.followPath(paths.Path7, true);
+                    setTrayPosition(TRAY_POS_1_SCORE);
                     rubberBands.setPower(0);
                     setPathState(pathState + 1);
                 }
@@ -314,9 +315,9 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 10:
                 telemetry.addLine("Case " + pathState + ": Wait for Path7 to get into position, then start Path8");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
                     telemetry.addLine("Case " + pathState + ": Shoot the pattern");
-                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
+                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9); // TODO: adjust power as needed with voltage
                     setPathState(pathState + 1);
                 }
                 break;
@@ -325,7 +326,6 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": Wait for Path6 to finish, then stop");
                 shootPatternFSM.updateShootPattern(getRuntime());
                 if (shootPatternFSM.isShootPatternDone()) {
-
                     telemetry.addLine("Case " + pathState + ": Done, setting state -1");
                     rubberBands.setPower(0);
                     setPathState(-1); // done

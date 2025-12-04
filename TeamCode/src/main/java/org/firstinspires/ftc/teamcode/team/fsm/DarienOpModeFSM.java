@@ -61,12 +61,12 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double INTAKE_SERVO_POS_DOWN = 0.21;
     public static double INTAKE_SERVO_DURATION_RAISE = 1.5; // seconds
     public static double TRAY_SERVO_DURATION_ROTATE = 1.5; // seconds
-    public static final double TRAY_POS_1_INTAKE = 0.23;
-    public static final double TRAY_POS_2_INTAKE = 0.8;
-    public static final double TRAY_POS_3_INTAKE = 0.54;
-    public static final double TRAY_POS_1_SCORE = .67;
-    public static final double TRAY_POS_2_SCORE = 0.38;
-    public static final double TRAY_POS_3_SCORE = 0.08;
+    public static double TRAY_POS_1_INTAKE = 0.275;
+    public static double TRAY_POS_2_INTAKE = 0.205;
+    public static double TRAY_POS_3_INTAKE = 0.350;
+    public static double TRAY_POS_1_SCORE = 0.385;
+    public static double TRAY_POS_2_SCORE = 0.310;
+    public static double TRAY_POS_3_SCORE = 0.240;
     public static final double ELEVATOR_POS_UP = 0.83;
     public static final double ELEVATOR_POS_DOWN = 0.45;
     public static final double FEEDER_POS_UP = .9;
@@ -127,7 +127,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
         intakeServoFSM = new ServoIncrementalFSM(IntakeServo);
         //trayServoFSM = new ServoIncrementalFSM(TrayServo);
-        //currentTrayPosition = 0.5;
+        //currentTrayPosition = TRAY_POS_1_SCORE; // set a default tray position
 
         startTimeIntakeColorSensor = getRuntime();
 
@@ -142,8 +142,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
      * @param duration The duration over which to move the tray servo to the desired position.
      */
     public void setTrayPosition(double position, double duration) {
-        //TrayServo.setPosition(position);
-        servoIncremental(TrayServo, position, currentTrayPosition, duration, 4);
+        TrayServo.setPosition(position);
+        //servoIncremental(TrayServo, position, currentTrayPosition, duration, 4);
         currentTrayPosition = position;
         /*
         if (!trayServoFSM.isRunning()) {

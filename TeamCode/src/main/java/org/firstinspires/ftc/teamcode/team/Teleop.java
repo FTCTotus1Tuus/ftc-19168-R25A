@@ -137,29 +137,35 @@ public class Teleop extends DarienOpModeTeleop {
             */
             // CONTROL: ROTATING TRAY
             if (gamepad2.dpad_left){
+                setTrayPosition(TRAY_POS_1_INTAKE);
                 //Tray.setPosition(TRAY_POS_1_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_1_INTAKE;
+                //servoIncremental(TrayServo,TRAY_POS_1_INTAKE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_1_INTAKE;
             } else if (gamepad2.x){
+                setTrayPosition(TRAY_POS_1_SCORE);
                 //Tray.setPosition(TRAY_POS_1_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_1_SCORE;
+                //servoIncremental(TrayServo,TRAY_POS_1_SCORE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_1_SCORE;
             } else if (gamepad2.dpad_up){
+                setTrayPosition(TRAY_POS_2_INTAKE);
                 //Tray.setPosition(TRAY_POS_2_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_2_INTAKE;
+                //servoIncremental(TrayServo,TRAY_POS_2_INTAKE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_2_INTAKE;
             } else if (gamepad2.y){
+                setTrayPosition(TRAY_POS_2_SCORE);
                 //Tray.setPosition(TRAY_POS_2_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_2_SCORE;
+                //servoIncremental(TrayServo,TRAY_POS_2_SCORE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_2_SCORE;
             } else if (gamepad2.dpad_right){
+                setTrayPosition(TRAY_POS_3_INTAKE);
                 //Tray.setPosition(TRAY_POS_3_INTAKE);
-                servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_3_INTAKE;
+                //servoIncremental(TrayServo,TRAY_POS_3_INTAKE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_3_INTAKE;
             } else if (gamepad2.b){
+                setTrayPosition(TRAY_POS_3_SCORE);
                 //Tray.setPosition(TRAY_POS_3_SCORE);
-                servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1,4);
-                currentTrayPosition = TRAY_POS_3_SCORE;
+                //servoIncremental(TrayServo,TRAY_POS_3_SCORE,currentTrayPosition, 1,4);
+                //currentTrayPosition = TRAY_POS_3_SCORE;
             }
             //MACRO: APRILTAG 21
             /*
