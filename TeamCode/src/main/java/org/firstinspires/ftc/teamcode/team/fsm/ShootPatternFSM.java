@@ -19,7 +19,7 @@ public class ShootPatternFSM {
     private int nbMotifIndex = 0;
     private double nbLastActionTime = 0;
     private boolean nbShootingActive = false;
-    private double shootPower = 1;
+    private double shootPower = 0;
     private boolean shotStarted = false;
 
     public void startShootPattern(ArrayList<AprilTagDetection> detections, double currentTime, double shootingPower) {
@@ -29,6 +29,8 @@ public class ShootPatternFSM {
         nbLastActionTime = currentTime;
         nbShootingActive = true;
         shootPower = shootingPower;
+        shootArtifactFSM.setEjectionMotorsControlledByPattern(true);
+        shootArtifactFSM.shotGun(shootPower);
     }
 
     public void updateShootPattern(double currentTime) {
@@ -50,6 +52,8 @@ public class ShootPatternFSM {
 
         if (nbMotifIndex >= motif.length) {
             nbShootingActive = false;
+            shootArtifactFSM.shotGunStop(); // Stop motors
+            shootArtifactFSM.setEjectionMotorsControlledByPattern(false);
             return;
         }
 

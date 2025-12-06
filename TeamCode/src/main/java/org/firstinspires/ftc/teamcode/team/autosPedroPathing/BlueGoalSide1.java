@@ -244,7 +244,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
             case 4:
                 telemetry.addLine("Case " + pathState + ": start shooting");
 
-                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
+                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP);
 
                 if (pathTimer.getElapsedTimeSeconds() > 1.0) {
                     setPathState(pathState + 1);
@@ -317,7 +317,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": Wait for Path7 to get into position, then start Path8");
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
                     telemetry.addLine("Case " + pathState + ": Shoot the pattern");
-                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9); // TODO: adjust power as needed with voltage
+                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP); // TODO: adjust power as needed with voltage
                     setPathState(pathState + 1);
                 }
                 break;

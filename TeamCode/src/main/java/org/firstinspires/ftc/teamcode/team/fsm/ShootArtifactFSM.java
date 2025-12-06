@@ -11,13 +11,14 @@ public class ShootArtifactFSM {
     }
 
     private final DarienOpModeFSM opMode;
+    private boolean ejectionMotorsControlledByPattern = false;
 
     private ShootingStage shootingStage = ShootingStage.IDLE;
     private double shootingStartTime = 0;
 
     // Timings (seconds)
     private static final double STAGE1_DELAY = .100;    // elevator up -> shotgun start
-    private static final double STAGE2_DELAY = .600;    // shotgun running before feeder
+    private static final double STAGE2_DELAY = .800;    // shotgun running before feeder
     private static final double STAGE3_DELAY = .500;    // feeder up while spinning
 
     public ShootArtifactFSM(DarienOpModeFSM opMode) {
@@ -26,6 +27,10 @@ public class ShootArtifactFSM {
 
     // Call this to begin shooting
     public void startShooting() {
+        if (!ejectionMotorsControlledByPattern) {
+            shotGun(opMode.SHOT_GUN_POWER_UP);
+        }
+
         shootingStage = ShootingStage.ELEVATOR_UP;
         shootingStartTime = opMode.getRuntime();
 
@@ -45,7 +50,9 @@ public class ShootArtifactFSM {
 
             case ELEVATOR_UP:
                 if (currentTime - shootingStartTime >= STAGE1_DELAY) {
-                    shotGun(DarienOpModeFSM.SHOT_GUN_POWER_UP * shootingPower);
+                    if (!ejectionMotorsControlledByPattern) {
+                        shotGun(DarienOpModeFSM.SHOT_GUN_POWER_UP * shootingPower);
+                    }
                     shootingStage = ShootingStage.SHOTGUN_SPINUP;
                     shootingStartTime = currentTime; // Reset timer for next stage
                 }
@@ -61,7 +68,9 @@ public class ShootArtifactFSM {
 
             case FEEDER_UP:
                 if (currentTime - shootingStartTime >= STAGE3_DELAY) {
-                    shotGunStop();
+                    if (!ejectionMotorsControlledByPattern) {
+                        shotGunStop();
+                    }
                     opMode.Feeder.setPosition(DarienOpModeFSM.FEEDER_POS_DOWN);
                     opMode.Elevator.setPosition(DarienOpModeFSM.ELEVATOR_POS_DOWN);
                     shootingStage = ShootingStage.FINISHED;
@@ -81,13 +90,18 @@ public class ShootArtifactFSM {
     }
 
     public void shotGun(double power) {
-        opMode.ejectionMotorLeft.setPower(power);
-        opMode.ejectionMotorRight.setPower(-power);
+        opMode.ejectionMotorLeft.setPower(opMode.getVoltageAdjustedMotorPower(power));
+        opMode.ejectionMotorRight.setPower(-opMode.getVoltageAdjustedMotorPower(power));
     }
 
     public void shotGunStop() {
         opMode.ejectionMotorLeft.setPower(0);
         opMode.ejectionMotorRight.setPower(0);
     }
+
+    public void setEjectionMotorsControlledByPattern(boolean controlled) {
+        this.ejectionMotorsControlledByPattern = controlled;
+    }
+
 
 }
