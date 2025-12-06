@@ -46,7 +46,7 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
         initControls();
         tp = new TelemetryPacket();
         dash = FtcDashboard.getInstance();
-        double startTimeColor = getRuntime();
+        startTimeIntakeColorSensor = getRuntime();
 
         waitForStart();
         if (isStopRequested()) return;
@@ -95,6 +95,11 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
                 ejectionMotorRight.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_DOWN));
             }
 
+            //CONTROL: SHOTGUN MACRO
+            if (gamepad2.dpad_down) {
+
+            }
+
             //CONTROL: ELEVATOR
             if (gamepad2.left_bumper) {
                 Elevator.setPosition(ELEVATOR_POS_UP);
@@ -128,8 +133,8 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
                 intakeLifted = false; // Cancel any automatic lift
             } else if (intakeColorSensor instanceof DistanceSensor) {
                 telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
-                if (!intakeLifted && ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && !isRubberBandsReversed) {
-                    startTimeColor = getRuntime();
+                if (!intakeLifted && ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && !isRubberBandsReversed && (getRuntime() - startTimeIntakeColorSensor) >= COLOR_SENSOR_TIMEOUT) {
+                    startTimeIntakeColorSensor = getRuntime();
                     intakeLifted = true;
                     intakeLiftStartTime = getRuntime();
                 }

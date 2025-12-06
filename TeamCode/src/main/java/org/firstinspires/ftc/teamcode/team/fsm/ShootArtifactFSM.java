@@ -59,7 +59,7 @@ public class ShootArtifactFSM {
                 break;
 
             case SHOTGUN_SPINUP:
-                if (currentTime - shootingStartTime >= STAGE2_DELAY) {
+                if (!ejectionMotorsControlledByPattern || currentTime - shootingStartTime >= STAGE2_DELAY) {
                     opMode.Feeder.setPosition(DarienOpModeFSM.FEEDER_POS_UP);
                     shootingStage = ShootingStage.FEEDER_UP;
                     shootingStartTime = currentTime; // Reset timer for next stage

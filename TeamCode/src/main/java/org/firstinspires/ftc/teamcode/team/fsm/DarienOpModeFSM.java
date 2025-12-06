@@ -60,6 +60,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double INTAKE_SERVO_POS_UP = 0.75;
     public static final double INTAKE_SERVO_POS_DOWN = 0.21;
     public static double INTAKE_SERVO_DURATION_RAISE = 1; // seconds
+    public static double COLOR_SENSOR_TIMEOUT = 2; // seconds
     public static double TRAY_SERVO_DURATION_ROTATE = 1.5; // seconds
     public static double TRAY_POS_1_INTAKE = 0.275;
     public static double TRAY_POS_2_INTAKE = 0.205;
@@ -71,7 +72,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double ELEVATOR_POS_DOWN = 0.45;
     public static final double FEEDER_POS_UP = .9;
     public static final double FEEDER_POS_DOWN = .45;
-    public static double SHOT_GUN_POWER_UP = 0.32; // tuned to 6000 rpm motor
+    public static double SHOT_GUN_POWER_UP = 0.31; // tuned to 6000 rpm motor
     public static double SHOT_GUN_POWER_UP_FAR = 0.39; // tuned to 6000 rpm motor
     public static double SHOT_GUN_POWER_DOWN = 0.2; // tuned to 6000 rpm motor
     public static final double TIMEOUT_APRILTAG_DETECTION = 3;
@@ -81,7 +82,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public double IntakeServoPosition = 0;
     public double currentTrayPosition;
     //public double targetTrayPosition = 0.0;
-    private double startTimeIntakeColorSensor;
+    public double startTimeIntakeColorSensor;
     public boolean intakeLifted = false;
     public double intakeLiftStartTime = 0;
 
@@ -167,16 +168,17 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     }
 
     public void runIntakeLifterWithColorSensor() {
-        if (intakeColorSensor instanceof DistanceSensor) {
-            if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= INTAKE_SERVO_DURATION_RAISE) {
-                startTimeIntakeColorSensor = getRuntime();
-                intakeServoFSM.start(INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_SERVO_DURATION_RAISE, getRuntime());
-            } else {
-                IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
-            }
-        }
         if (intakeServoFSM.isRunning()) {
             intakeServoFSM.update(getRuntime());
+        } else {
+            if (intakeColorSensor instanceof DistanceSensor) {
+                if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeIntakeColorSensor) >= COLOR_SENSOR_TIMEOUT) {
+                    startTimeIntakeColorSensor = getRuntime();
+                    intakeServoFSM.start(INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_SERVO_DURATION_RAISE, getRuntime());
+                } else {
+                    IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
+                }
+            }
         }
     }
 
