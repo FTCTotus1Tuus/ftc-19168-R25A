@@ -77,11 +77,11 @@ public class ShootPatternFSM {
                 break;
             case 2: // Shoot and wait for completion
                 if (!shotStarted) {
-                    shootArtifactFSM.startShooting();
+                    shootArtifactFSM.startShooting(shootPower);
                     shotStarted = true;
                     nbLastActionTime = currentTime;
                 }
-                shootArtifactFSM.updateShooting(shootPower);
+                shootArtifactFSM.updateShooting();
                 if (shootArtifactFSM.shootingDone() || currentTime - nbLastActionTime >= 2.0) {
                     shootArtifactFSM.resetShooting();
                     nbMotifIndex++;

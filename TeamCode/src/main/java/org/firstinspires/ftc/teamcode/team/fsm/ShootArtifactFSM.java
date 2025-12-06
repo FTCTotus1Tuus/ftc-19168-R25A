@@ -7,6 +7,7 @@ public class ShootArtifactFSM {
         ELEVATOR_UP,
         SHOTGUN_SPINUP,
         FEEDER_UP,
+        FINISHING,
         FINISHED
     }
 
@@ -15,20 +16,23 @@ public class ShootArtifactFSM {
 
     private ShootingStage shootingStage = ShootingStage.IDLE;
     private double shootingStartTime = 0;
+    private double shootingPower = 0;
 
     // Timings (seconds)
     private static final double STAGE1_DELAY = .100;    // elevator up -> shotgun start
     private static final double STAGE2_DELAY = .800;    // shotgun running before feeder
     private static final double STAGE3_DELAY = .500;    // feeder up while spinning
+    private static final double STAGE4_DELAY = .100;    // Allow the servos to finish their movement
 
     public ShootArtifactFSM(DarienOpModeFSM opMode) {
         this.opMode = opMode;
     }
 
     // Call this to begin shooting
-    public void startShooting() {
+    public void startShooting(double shootingPower) {
+        this.shootingPower = shootingPower;
         if (!ejectionMotorsControlledByPattern) {
-            shotGun(opMode.SHOT_GUN_POWER_UP);
+            shotGun(shootingPower);
         }
 
         shootingStage = ShootingStage.ELEVATOR_UP;
@@ -38,7 +42,7 @@ public class ShootArtifactFSM {
     }
 
     // Call this inside loop() or inside your main auto while-loop
-    public void updateShooting(double shootingPower) {
+    public void updateShooting() {
         if (shootingStage == ShootingStage.IDLE ||
                 shootingStage == ShootingStage.FINISHED) {
             return;
@@ -51,7 +55,7 @@ public class ShootArtifactFSM {
             case ELEVATOR_UP:
                 if (currentTime - shootingStartTime >= STAGE1_DELAY) {
                     if (!ejectionMotorsControlledByPattern) {
-                        shotGun(DarienOpModeFSM.SHOT_GUN_POWER_UP * shootingPower);
+                        shotGun(shootingPower);
                     }
                     shootingStage = ShootingStage.SHOTGUN_SPINUP;
                     shootingStartTime = currentTime; // Reset timer for next stage
@@ -73,6 +77,11 @@ public class ShootArtifactFSM {
                     }
                     opMode.Feeder.setPosition(DarienOpModeFSM.FEEDER_POS_DOWN);
                     opMode.Elevator.setPosition(DarienOpModeFSM.ELEVATOR_POS_DOWN);
+                    shootingStage = ShootingStage.FINISHING;
+                }
+                break;
+            case FINISHING:
+                if (currentTime - shootingStartTime >= STAGE4_DELAY) {
                     shootingStage = ShootingStage.FINISHED;
                 }
                 break;
