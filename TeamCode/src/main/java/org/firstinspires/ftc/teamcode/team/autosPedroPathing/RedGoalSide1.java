@@ -4,13 +4,19 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.PanelsTelemetry;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
+import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
 
+/**
+ * Pedro Pathing auto using LinearOpMode via DarienOpModeFSM.
+ */
 @Autonomous(name = "RedGoalSidePedro", group = "Pedro:Reds", preselectTeleOp = "Teleop")
 @Configurable
 public class RedGoalSide1 extends DarienOpModeFSM {
@@ -36,7 +42,7 @@ public class RedGoalSide1 extends DarienOpModeFSM {
 
         follower = Constants.createFollower(hardwareMap);
         // Starting pose – same as your OpMode version
-        follower.setStartingPose(new Pose(72, 72, Math.toRadians(-90)));
+        follower.setStartingPose(new Pose(121.286, 124.378, Math.toRadians(127)));
 
         // Build all the paths once
         paths = new Paths(follower);
@@ -83,9 +89,127 @@ public class RedGoalSide1 extends DarienOpModeFSM {
     /**
      * Inner class defining all the Pedro paths.
      */
+    //67
     public static class Paths {
-        public Paths(Follower follower) {
 
+        public PathChain Path1;
+        public PathChain Path2;
+        public PathChain Path3;
+        public PathChain Path4;
+        public PathChain Path5;
+        public PathChain Path6;
+        public PathChain Path7;
+        public PathChain Path8;
+
+        private double mirrorX(double x) {
+            return 144 - x;
+        }
+
+        private double mirrorHeading(double headingRad) {
+            return Math.PI - headingRad;
+        }
+
+        public Paths(Follower follower) {
+            Path1 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(121.286, 124.378),
+                                    new Pose(mirrorX(47.224), 96.443)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(
+                            Math.toRadians(127),
+                            mirrorHeading(Math.toRadians(70))
+                    )
+                    .build();
+
+            Path2 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(47.224), 96.443, mirrorHeading(Math.toRadians(70))),
+                                    new Pose(mirrorX(47.234), 96.443, mirrorHeading(Math.toRadians(145)))
+                            )
+                    )
+                    .setLinearHeadingInterpolation(
+                            mirrorHeading(Math.toRadians(70)),
+                            mirrorHeading(Math.toRadians(145))
+                    )
+                    .build();
+
+            Path3 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(43.234), 96.443),
+                                    new Pose(mirrorX(43.5), 87.305)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(
+                            mirrorHeading(Math.toRadians(145)),
+                            mirrorHeading(Math.toRadians(180))
+                    )
+                    .build();
+
+            Path4 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(43.5), 87.305),
+                                    new Pose(mirrorX(33.5), 87.305)
+                            )
+                    )
+                    .setTangentHeadingInterpolation()
+                    .build();
+
+            Path5 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(33.5), 87.305),
+                                    new Pose(mirrorX(29.5), 87.305)
+                            )
+                    )
+                    .setTangentHeadingInterpolation()
+                    .build();
+
+            Path6 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(29.25), 87.305),
+                                    new Pose(mirrorX(17.792), 87.305)
+                            )
+                    )
+                    .setTangentHeadingInterpolation()
+                    .build();
+
+            Path7 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierCurve(
+                                    new Pose(mirrorX(17.792), 87.305),
+                                    new Pose(mirrorX(44.564), 103.926),
+                                    new Pose(mirrorX(47.557), 119.383)
+                            )
+                    )
+                    .setLinearHeadingInterpolation(
+                            mirrorHeading(Math.toRadians(180)),
+                            mirrorHeading(Math.toRadians(157))
+                    )
+                    .build();
+
+            Path8 = follower
+                    .pathBuilder()
+                    .addPath(
+                            new BezierLine(
+                                    new Pose(mirrorX(47.224), 96.443),
+                                    new Pose(mirrorX(47.557), 122.383)
+                            )
+                    )
+                    .setTangentHeadingInterpolation()
+                    .build();
         }
 
     }
@@ -149,7 +273,7 @@ public class RedGoalSide1 extends DarienOpModeFSM {
             case 4:
                 telemetry.addLine("Case " + pathState + ": start shooting");
 
-                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9);
+                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP);
 
                 if (pathTimer.getElapsedTimeSeconds() > 1.0) {
                     setPathState(pathState + 1);
@@ -222,7 +346,7 @@ public class RedGoalSide1 extends DarienOpModeFSM {
                 telemetry.addLine("Case " + pathState + ": Wait for Path7 to get into position, then start Path8");
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3) {
                     telemetry.addLine("Case " + pathState + ": Shoot the pattern");
-                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), 0.9); // TODO: adjust power as needed with voltage
+                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP); // TODO: adjust power as needed with voltage
                     setPathState(pathState + 1);
                 }
                 break;
