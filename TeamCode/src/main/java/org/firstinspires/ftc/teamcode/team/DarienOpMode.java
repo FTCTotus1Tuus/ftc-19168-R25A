@@ -69,6 +69,7 @@ public class DarienOpMode extends LinearOpMode {
 
     public static double INTAKE_SERVO_POS_UP = 0.75;
     public static double INTAKE_SERVO_POS_DOWN = 0.21;
+    public static double INTAKE_SERVO_DURATION_RAISE = 1; // seconds
     public static double TRAY_POS_1_INTAKE = 0.275;
     public static double TRAY_POS_2_INTAKE = 0.205;
     public static double TRAY_POS_3_INTAKE = 0.350;
@@ -85,13 +86,17 @@ public class DarienOpMode extends LinearOpMode {
     public static double ELEVATOR_POS_DOWN = 0.45;
     public static double FEEDER_POS_UP = .9;
     public static double FEEDER_POS_DOWN = .45;
-    public static double SHOT_GUN_POWER_UP = 1;
+    public static double SHOT_GUN_POWER_UP = 0.32; // tuned to 6000 rpm motor
+    public static double SHOT_GUN_POWER_UP_FAR = 0.39; // tuned to 6000 rpm motor
+    public static double SHOT_GUN_POWER_DOWN = 0.2; // tuned to 6000 rpm motor
 
     public double TIMEOUT_APRILTAG_DETECTION = 3; // seconds
     public static double INTAKE_RUBBER_BANDS_POWER = -0.7;
     public static double OUTPUT_RUBBER_BANDS_POWER = 0.2;
 
     double startTimeIntakeColorSensor;
+    public boolean intakeLifted = false;
+    public double intakeLiftStartTime = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -418,6 +423,13 @@ public class DarienOpMode extends LinearOpMode {
 
     public static double clamp(double val, double min, double max) {
         return Math.max(min, Math.min(max, val));
+    }
+
+    public double getVoltageAdjustedMotorPower(double power) {
+        double nominalVoltage = 13.0; // Typical full battery voltage for FTC
+        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double scale = nominalVoltage / currentVoltage;
+        return power * scale;
     }
 
 }

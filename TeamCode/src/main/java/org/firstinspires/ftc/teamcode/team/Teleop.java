@@ -55,24 +55,27 @@ public class Teleop extends DarienOpModeTeleop {
                 isRubberBandsReversed = false;
             }
 
-           if (gamepad2.back) {
-             shootArtifact();
-           }
-                if (gamepad2.right_trigger  > 0.05){
-                ejectionMotorLeft.setPower(1);
-                ejectionMotorRight.setPower(-1);
+            if (gamepad2.back) {
+                shootArtifact();
+            }
+            if (gamepad2.right_trigger > 0.05 && gamepad2.right_stick_y >= -0.05) {
+                ejectionMotorLeft.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP));
+                ejectionMotorRight.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP));
+            } else if (gamepad2.right_trigger > 0.05 && gamepad2.right_stick_y < -0.05) {
+                ejectionMotorLeft.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP_FAR));
+                ejectionMotorRight.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP_FAR));
             } else {
                 ejectionMotorLeft.setPower(0);
                 ejectionMotorRight.setPower(0);
             }
             //CONTROL: TRAYINIT
             if (gamepad2.start) {
-                servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 1);
+                setTrayPosition(TRAY_POS_1_INTAKE);
             }
             //CONTROL: EJECTIONMOTOR BACKWARDS
             if (gamepad2.left_trigger > 0.05) {
-                ejectionMotorRight.setPower(.5);
-                ejectionMotorLeft.setPower(-.5);
+                ejectionMotorLeft.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_DOWN));
+                ejectionMotorRight.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_DOWN));
             }
 
             //CONTROL: ELEVATOR
@@ -103,20 +106,29 @@ public class Teleop extends DarienOpModeTeleop {
                     .addData("Red", "%.3f", colors.red)
                     .addData("Green", "%.3f", colors.green)
                     .addData("Blue", "%.3f", colors.blue);
-            if (intakeColorSensor instanceof DistanceSensor) {
+            if (gamepad2.a) {
+                IntakeServo.setPosition(INTAKE_SERVO_POS_UP);
+                intakeLifted = false; // Cancel any automatic lift
+            } else if (intakeColorSensor instanceof DistanceSensor) {
                 telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
-                if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && isRubberBandsReversed == false) {
+                if (!intakeLifted && ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && !isRubberBandsReversed) {
                     startTimeColor = getRuntime();
-                    servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, 1,1);
+                    intakeLifted = true;
+                    intakeLiftStartTime = getRuntime();
                 }
-            }
-            telemetry.update();
-
-            if (gamepad2.a){
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_TIME,1);
+                if (intakeLifted) {
+                    IntakeServo.setPosition(INTAKE_SERVO_POS_UP);
+                    if (getRuntime() - intakeLiftStartTime >= INTAKE_SERVO_DURATION_RAISE) {
+                        intakeLifted = false;
+                    }
+                } else {
+                    IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
+                }
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
+            telemetry.update();
+
             /*
             if (isIntakeServoMoving) {
                 // Continue moving the servo until the position is reached.

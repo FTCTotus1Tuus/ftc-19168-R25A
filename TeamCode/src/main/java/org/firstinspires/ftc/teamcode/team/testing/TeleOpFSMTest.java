@@ -33,6 +33,11 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
         super.initControls();
         follower = Constants.createFollower(hardwareMap);
         //shootArtifactFSM = new ShootArtifactFSM(this);
+
+        // Initialize rubber bands to off
+        rubberBands.setPower(0);
+        isRubberBandsReversed = false;
+        //TrayServo.setPosition(currentTrayPosition); // Prevent movement at init
     }
 
     @Override
@@ -59,7 +64,7 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
             if (gamepad1.y) {
                 rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
                 isRubberBandsReversed = false;
-            } else if (gamepad1.a) {
+            } else if (gamepad1.a && !gamepad1.start) {
                 rubberBands.setPower(OUTPUT_RUBBER_BANDS_POWER);
                 isRubberBandsReversed = true;
             } else if (gamepad1.x) {
@@ -70,9 +75,12 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
             //if (gamepad2.back) {
             //    shootArtifact();
             //}
-            if (gamepad2.right_trigger > 0.05) {
-                ejectionMotorLeft.setPower(1);
-                ejectionMotorRight.setPower(-1);
+            if (gamepad2.right_trigger > 0.05 && gamepad2.right_stick_y >= -0.05) {
+                ejectionMotorLeft.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP));
+                ejectionMotorRight.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP));
+            } else if (gamepad2.right_trigger > 0.05 && gamepad2.right_stick_y < -0.05) {
+                ejectionMotorLeft.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP_FAR));
+                ejectionMotorRight.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_UP_FAR));
             } else {
                 ejectionMotorLeft.setPower(0);
                 ejectionMotorRight.setPower(0);
@@ -83,8 +91,8 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
             }
             //CONTROL: EJECTIONMOTOR BACKWARDS
             if (gamepad2.left_trigger > 0.05) {
-                ejectionMotorRight.setPower(.5);
-                ejectionMotorLeft.setPower(-.5);
+                ejectionMotorLeft.setPower(-getVoltageAdjustedMotorPower(SHOT_GUN_POWER_DOWN));
+                ejectionMotorRight.setPower(getVoltageAdjustedMotorPower(SHOT_GUN_POWER_DOWN));
             }
 
             //CONTROL: ELEVATOR
@@ -115,39 +123,54 @@ public class TeleOpFSMTest extends DarienOpModeFSM {
                     .addData("Red", "%.3f", colors.red)
                     .addData("Green", "%.3f", colors.green)
                     .addData("Blue", "%.3f", colors.blue);
-            if (intakeColorSensor instanceof DistanceSensor) {
-                telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
-                if (((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && isRubberBandsReversed == false) {
-                    startTimeColor = getRuntime();
-                    servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_TIME, 1);
-                }
-            }
-            telemetry.update();
-
             if (gamepad2.a) {
-                servoIncremental(IntakeServo, INTAKE_SERVO_POS_UP, INTAKE_SERVO_POS_DOWN, INTAKE_TIME, 1);
+                IntakeServo.setPosition(INTAKE_SERVO_POS_UP);
+                intakeLifted = false; // Cancel any automatic lift
+            } else if (intakeColorSensor instanceof DistanceSensor) {
+                telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM));
+                if (!intakeLifted && ((DistanceSensor) intakeColorSensor).getDistance(DistanceUnit.CM) <= INTAKE_DISTANCE && (getRuntime() - startTimeColor) >= 1 && !isRubberBandsReversed) {
+                    startTimeColor = getRuntime();
+                    intakeLifted = true;
+                    intakeLiftStartTime = getRuntime();
+                }
+                if (intakeLifted) {
+                    IntakeServo.setPosition(INTAKE_SERVO_POS_UP);
+                    if (getRuntime() - intakeLiftStartTime >= INTAKE_SERVO_DURATION_RAISE) {
+                        intakeLifted = false;
+                    }
+                } else {
+                    IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
+                }
             } else {
                 IntakeServo.setPosition(INTAKE_SERVO_POS_DOWN);
             }
+            telemetry.update();
+
             // CONTROL: ROTATING TRAY
             if (gamepad2.dpad_left) {
-                servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_1_INTAKE;
+                setTrayPosition(TRAY_POS_1_INTAKE);
+                //servoIncremental(TrayServo, TRAY_POS_1_INTAKE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_1_INTAKE;
             } else if (gamepad2.x) {
-                servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_1_SCORE;
+                setTrayPosition(TRAY_POS_1_SCORE);
+                //servoIncremental(TrayServo, TRAY_POS_1_SCORE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_1_SCORE;
             } else if (gamepad2.dpad_up) {
-                servoIncremental(TrayServo, TRAY_POS_2_INTAKE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_2_INTAKE;
+                setTrayPosition(TRAY_POS_2_INTAKE);
+                //servoIncremental(TrayServo, TRAY_POS_2_INTAKE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_2_INTAKE;
             } else if (gamepad2.y) {
-                servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_2_SCORE;
+                setTrayPosition(TRAY_POS_2_SCORE);
+                //servoIncremental(TrayServo, TRAY_POS_2_SCORE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_2_SCORE;
             } else if (gamepad2.dpad_right) {
-                servoIncremental(TrayServo, TRAY_POS_3_INTAKE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_3_INTAKE;
-            } else if (gamepad2.b) {
-                servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
-                currentTrayPosition = TRAY_POS_3_SCORE;
+                setTrayPosition(TRAY_POS_3_INTAKE);
+                //servoIncremental(TrayServo, TRAY_POS_3_INTAKE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_3_INTAKE;
+            } else if (gamepad2.b && !gamepad2.start) {
+                setTrayPosition(TRAY_POS_3_SCORE);
+                //servoIncremental(TrayServo, TRAY_POS_3_SCORE, currentTrayPosition, 1, 4);
+                //currentTrayPosition = TRAY_POS_3_SCORE;
             }
 
             /*

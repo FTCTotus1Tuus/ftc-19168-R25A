@@ -59,7 +59,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double INTAKE_DISTANCE = 5;
     public static final double INTAKE_SERVO_POS_UP = 0.75;
     public static final double INTAKE_SERVO_POS_DOWN = 0.21;
-    public static double INTAKE_SERVO_DURATION_RAISE = 1.5; // seconds
+    public static double INTAKE_SERVO_DURATION_RAISE = 1; // seconds
     public static double TRAY_SERVO_DURATION_ROTATE = 1.5; // seconds
     public static double TRAY_POS_1_INTAKE = 0.275;
     public static double TRAY_POS_2_INTAKE = 0.205;
@@ -71,7 +71,9 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double ELEVATOR_POS_DOWN = 0.45;
     public static final double FEEDER_POS_UP = .9;
     public static final double FEEDER_POS_DOWN = .45;
-    public static final double SHOT_GUN_POWER_UP = 1;
+    public static double SHOT_GUN_POWER_UP = 0.32; // tuned to 6000 rpm motor
+    public static double SHOT_GUN_POWER_UP_FAR = 0.39; // tuned to 6000 rpm motor
+    public static double SHOT_GUN_POWER_DOWN = 0.2; // tuned to 6000 rpm motor
     public static final double TIMEOUT_APRILTAG_DETECTION = 3;
     public static double INTAKE_RUBBER_BANDS_POWER = -0.7;
     public static double OUTPUT_RUBBER_BANDS_POWER = 0.2;
@@ -80,6 +82,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public double currentTrayPosition;
     //public double targetTrayPosition = 0.0;
     private double startTimeIntakeColorSensor;
+    public boolean intakeLifted = false;
+    public double intakeLiftStartTime = 0;
 
     // Abstract method for child classes to implement
     @Override
@@ -229,4 +233,10 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
     }
 
+    public double getVoltageAdjustedMotorPower(double power) {
+        double nominalVoltage = 13.0; // Typical full battery voltage for FTC
+        double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double scale = nominalVoltage / currentVoltage;
+        return power * scale;
+    }
 }
