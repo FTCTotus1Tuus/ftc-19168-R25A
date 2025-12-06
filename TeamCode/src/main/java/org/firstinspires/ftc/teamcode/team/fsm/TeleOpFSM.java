@@ -17,7 +17,7 @@ import com.bylazar.telemetry.TelemetryManager;
 @TeleOp(name = "TeleopFSM", group = "DriverControl")
 @Config
 @Configurable
-public class TeleOpFSMTest extends DarienOpModeFSM {
+public class TeleOpFSM extends DarienOpModeFSM {
 
     private TelemetryManager panelsTelemetry;   // Panels Telemetry instance
     public Follower follower;                   // Pedro Pathing follower instance
