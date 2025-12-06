@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.team.testing;
+package org.firstinspires.ftc.teamcode.team.fsm;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -10,13 +10,11 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
-import org.firstinspires.ftc.teamcode.team.fsm.ShootArtifactFSM;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
 
-@TeleOp(name = "TeleopFSM Test", group = "DriverControl")
+@TeleOp(name = "TeleopFSM", group = "DriverControl")
 @Config
 @Configurable
 public class TeleOpFSMTest extends DarienOpModeFSM {
