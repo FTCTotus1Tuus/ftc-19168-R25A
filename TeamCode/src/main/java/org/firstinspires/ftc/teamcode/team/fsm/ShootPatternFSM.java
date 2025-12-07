@@ -11,7 +11,7 @@ public class ShootPatternFSM {
 
     public ShootPatternFSM(DarienOpModeFSM opMode) {
         this.opMode = opMode;
-        this.shootArtifactFSM = new ShootArtifactFSM(opMode);
+        this.shootArtifactFSM = opMode.shootArtifactFSM;
     }
 
     private ArrayList<AprilTagDetection> aprilTagDetections;

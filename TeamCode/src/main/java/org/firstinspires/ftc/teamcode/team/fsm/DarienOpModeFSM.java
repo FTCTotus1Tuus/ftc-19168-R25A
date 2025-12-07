@@ -31,6 +31,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     // public PathFollowerFSM pathFollowerFSM;
     public AprilTagDetectionFSM tagFSM;
     public ShootPatternFSM shootPatternFSM;
+    public ShootArtifactFSM shootArtifactFSM;
 
     // AprilTag
     public ArrayList<AprilTagDetection> aprilTagDetections;
@@ -128,6 +129,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
         // INSTANTIATE THE STATE MACHINES
         tagFSM = new AprilTagDetectionFSM(aprilTag, TIMEOUT_APRILTAG_DETECTION);
+        shootArtifactFSM = new ShootArtifactFSM(this);
         shootPatternFSM = new ShootPatternFSM(this);
 
         intakeServoFSM = new ServoIncrementalFSM(IntakeServo);
