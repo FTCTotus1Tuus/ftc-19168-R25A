@@ -202,6 +202,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
                 // Set the initial tray position
                 setTrayPosition(TRAY_POS_1_SCORE);
+                follower.setMaxPower(0.8); // move slowly to prevent artifacts from falling out of tray
                 follower.followPath(paths.Path1);
                 setPathState(pathState + 1);
                 break;
@@ -305,7 +306,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
                 if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
 
-                    follower.setMaxPower(0.8); //resume normal speed
+                    follower.setMaxPower(0.5); // move slowly to prevent artifacts from falling out of tray
                     follower.followPath(paths.Path7, true);
                     setTrayPosition(TRAY_POS_1_SCORE);
                     rubberBands.setPower(0);
