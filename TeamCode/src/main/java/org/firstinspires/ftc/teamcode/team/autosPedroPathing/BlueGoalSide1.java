@@ -118,7 +118,9 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
             Path1 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(20.286, 124.378), new Pose(47.224, 96.443))
+                            new BezierLine(
+                                    new Pose(20.286, 124.378),
+                                    new Pose(47.224, 96.443))
                     )
                     .setLinearHeadingInterpolation(Math.toRadians(54), Math.toRadians(70))
                     .build();
@@ -303,7 +305,7 @@ public class BlueGoalSide1 extends DarienOpModeFSM {
 
             case 9:
                 telemetry.addLine("Case " + pathState + ": Wait for Path6 to pick up artifact, then start Path7");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 3.0) {
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 3.0) {
                     telemetry.addLine("Case " + pathState + ": Moving to shooting position");
 
                     follower.setMaxPower(0.5); // move slowly to prevent artifacts from falling out of tray
