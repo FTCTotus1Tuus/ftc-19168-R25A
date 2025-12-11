@@ -45,9 +45,8 @@ public class ShootPatternFSM {
             case 22:
                 motif = new int[]{1, 2, 3}; break; // PGP
             case 23:
-                motif = new int[]{1, 3, 2}; break; // PPG
             default:
-                nbShootingActive = false; return;
+                motif = new int[]{1, 3, 2}; break; // PPG
         }
 
         if (nbMotifIndex >= motif.length) {

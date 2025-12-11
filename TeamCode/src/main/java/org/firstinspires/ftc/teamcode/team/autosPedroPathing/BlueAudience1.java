@@ -37,7 +37,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
 
         follower = Constants.createFollower(hardwareMap);
         // Starting pose – same as your OpMode version
-        follower.setStartingPose(new Pose(20.286, 124.378, Math.toRadians(54)));
+        follower.setStartingPose(new Pose(56, 9, Math.toRadians(90)));
 
         // Build all the paths once
         paths = new Paths(follower);
@@ -111,7 +111,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
                     .addPath(
                             new BezierLine(new Pose(56.000, 9.000), new Pose(56.000, 18.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(110))
+                    .setLinearHeadingInterpolation(Math.toRadians(90), Math.toRadians(112))
                     .build();
 
             IntakePosition = follower
@@ -119,13 +119,13 @@ public class BlueAudience1 extends DarienOpModeFSM {
                     .addPath(
                             new BezierLine(new Pose(56.000, 18.000), new Pose(42.000, 35.750))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(180))
+                    .setLinearHeadingInterpolation(Math.toRadians(112), Math.toRadians(180))
                     .build();
 
             Intake1 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(42.000, 35.750), new Pose(37.000, 35.750))
+                            new BezierLine(new Pose(42.000, 35.750), new Pose(34.000, 35.750))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -133,7 +133,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
             Intake2 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(37.000, 35.750), new Pose(32.000, 35.750))
+                            new BezierLine(new Pose(34.000, 35.750), new Pose(29.000, 35.750))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -141,7 +141,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
             Intake3 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(32.000, 35.750), new Pose(27.000, 35.750))
+                            new BezierLine(new Pose(29.000, 35.750), new Pose(25.000, 35.750))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -150,12 +150,12 @@ public class BlueAudience1 extends DarienOpModeFSM {
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(27.000, 35.750),
+                                    new Pose(25.000, 35.750),
                                     new Pose(45.000, 29.000),
                                     new Pose(56.000, 18.000)
                             )
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(110))
+                    .setLinearHeadingInterpolation(Math.toRadians(180), Math.toRadians(113.5))
                     .build();
 
             Parking = follower
@@ -163,7 +163,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
                     .addPath(
                             new BezierLine(new Pose(56.000, 18.000), new Pose(56.000, 29.000))
                     )
-                    .setLinearHeadingInterpolation(Math.toRadians(110), Math.toRadians(90))
+                    .setLinearHeadingInterpolation(Math.toRadians(113.5), Math.toRadians(90))
                     .build();
         }
     }
@@ -180,67 +180,89 @@ public class BlueAudience1 extends DarienOpModeFSM {
 
         switch (pathState) {
             case 0:
+                //start reading april tags
                 telemetry.addLine("Case " + pathState + ": Wait for Camera");
 
                 // Set the initial tray position
                 setTrayPosition(TRAY_POS_1_SCORE);
-                follower.setMaxPower(0.8); // move slowly to prevent artifacts from falling out of tray
                 tagFSM.start(getRuntime());
-                if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 2.67) {
-                    aprilTagDetections = tagFSM.getDetections();
+                if (pathTimer.getElapsedTimeSeconds() > 1.0) {
 
                     telemetry.addLine("Case " + pathState + ": exiting");
-                    follower.followPath(paths.ShootingPosition);
+
                     setPathState(pathState + 1);
                 }
                 break;
 
             case 1:
-                //start shooting
-                telemetry.addLine("Case " + pathState + ": Wait for ShootingPosition, then shoot artifact");
-                        telemetry.addLine("Case " + pathState + ": start shooting");
+                //once april tags done reading, move to shooting position 1
+                telemetry.addLine("Case " + pathState + ":");
 
-                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP);
+                tagFSM.update(getRuntime(), true, telemetry);
 
-                if (pathTimer.getElapsedTimeSeconds() > 1.0) {
+                if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 2.5) {
+                    aprilTagDetections = tagFSM.getDetections();
+                    aprilTagDetections.removeIf(tag -> tag.id == 20 || tag.id == 24);
+                    // TODO: Have fallback behavior if no tags detected
+                    follower.followPath(paths.ShootingPosition);
+
                     setPathState(pathState + 1);
                 }
                 break;
 
             case 2:
-                //Align to start intake
-                telemetry.addLine("Case " + pathState + ": updateShooting...");
-                shootPatternFSM.updateShootPattern(getRuntime());
+                //move to shooting position 1
+                telemetry.addLine("Case " + pathState + ": wait for Path 1...");
 
-                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 10.0) {
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.5) {
 
-                    rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
-
-                    // now continue with next path
-                    follower.followPath(paths.IntakePosition, true);
                     setPathState(pathState + 1);
                 }
                 break;
 
             case 3:
-                //start intaking balls
-                telemetry.addLine("Case " + pathState + ": Wait for Path3, then start Path4");
-                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 4.0) {
-                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 1p");
+                //once at shooting position 1, shoot artifacts set 1
+                telemetry.addLine("Case " + pathState + ": start shooting...");
 
-                    follower.setMaxPower(0.175); //slow down for pickup
+                shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP_FAR);
 
-                    setTrayPosition(TRAY_POS_1_INTAKE);
-                    follower.followPath(paths.Intake1, true);
+                if (pathTimer.getElapsedTimeSeconds() > 1) {
                     setPathState(pathState + 1);
                 }
                 break;
 
             case 4:
+                //once artifacts set 1 shot, move to intake position
+                telemetry.addLine("Case " + pathState + ": Update shooting...");
 
-                telemetry.addLine("Case " + pathState + ": Wait for Path4");
-                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 4.2) {
-                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 2p");
+                shootPatternFSM.updateShootPattern(getRuntime());
+
+                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 10.0) {
+
+                    rubberBands.setPower(INTAKE_RUBBER_BANDS_POWER);
+                    setTrayPosition(TRAY_POS_2_INTAKE);
+                    follower.followPath(paths.IntakePosition, true);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 5:
+                //when in position, go to intake position 1
+                telemetry.addLine("Case " + pathState + ": Going to intake position 1");
+
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 1.5) {
+
+                    follower.setMaxPower(0.175); //slow down for pickup
+                    follower.followPath(paths.Intake1, true);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 6:
+                //when ball 1 intaken, move to intake position 2
+                telemetry.addLine("Case " + pathState + ": Intaking ball 1g");
+
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.3) {
 
                     setTrayPosition(TRAY_POS_3_INTAKE);
                     follower.followPath(paths.Intake2, true);
@@ -248,23 +270,54 @@ public class BlueAudience1 extends DarienOpModeFSM {
                 }
                 break;
 
-            case 5:
-                telemetry.addLine("Case " + pathState + ": Wait for Path5");
+            case 7:
+                //move to intake position 3
+                telemetry.addLine("Case " + pathState + ": Intaking ball 3p");
                 if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.3) {
-                    telemetry.addLine("Case " + pathState + ": Move forward to pick up artifact 3g");
 
-                    setTrayPosition(TRAY_POS_2_INTAKE);
+                    setTrayPosition(TRAY_POS_1_INTAKE);
                     follower.followPath(paths.Intake3, true);
                     setPathState(pathState + 1);
                 }
                 break;
 
-            case 6:
+            case 8:
+                //once ball 3p intaken, move to shooting position 2
+                telemetry.addLine("Case " + pathState + ": Move to shoot position 2");
+
+                if (!follower.isBusy() && pathTimer.getElapsedTimeSeconds() > 2.3) {
+
+                    follower.setMaxPower(.8); //reset to normal speed
+                    shootArtifactFSM.shotGun(SHOT_GUN_POWER_UP_FAR);
+                    rubberBands.setPower(0); //stop intake
+                    follower.followPath(paths.ShootingPosition2, true);
+                    setPathState(pathState + 1);
+                }
+                break;
+
+            case 9:
+                //once at shooting position 2, shoot artifacts set 2
+                telemetry.addLine("Case " + pathState + ": Wait for ShootingPosition, then shoot artifact");
 
 
+                if (!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.0) {
+                    shootPatternFSM.startShootPattern(aprilTagDetections, getRuntime(), SHOT_GUN_POWER_UP_FAR);
+                    setPathState(pathState + 1);
+                }
+                break;
 
+            case 10:
+                //once artifacts set 2 shot, move to parking
+                telemetry.addLine("Case " + pathState + ": Update shooting");
 
+                shootPatternFSM.updateShootPattern(getRuntime());
 
+                if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 10.0) {
+
+                    follower.followPath(paths.Parking, true);
+                    setPathState(-1);
+                }
+                break;
 
 
             default:
