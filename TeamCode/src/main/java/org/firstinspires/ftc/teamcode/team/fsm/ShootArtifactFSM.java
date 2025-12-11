@@ -19,7 +19,7 @@ public class ShootArtifactFSM {
     private double shootingPower = 0;
 
     // Timings (seconds)
-    private static final double STAGE1_DELAY = .100;    // elevator up -> shotgun start
+    private static final double STAGE1_DELAY = .200;    // elevator up -> shotgun start
     private static final double STAGE2_DELAY = .800;    // shotgun running before feeder
     private static final double STAGE3_DELAY = .500;    // feeder up while spinning
     private static final double STAGE4_DELAY = .100;    // Allow the servos to finish their movement

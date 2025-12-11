@@ -204,7 +204,7 @@ public class TeleOpFSM extends DarienOpModeFSM {
                 // -----------------
 
                 //CONTROL: START SHOTGUN MACRO USING FSM
-                if (gamepad2.dpad_down) {
+                if (gamepad2.dpad_down && gamepad2.right_trigger > 0.05) {
                     // TODO: pre-spin up the shotgun before starting the shooting FSM
                     if (gamepad2.right_stick_y < -0.05) {
                         shootArtifactFSM.startShooting(SHOT_GUN_POWER_UP_FAR);
