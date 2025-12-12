@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.team.fsm.DarienOpModeFSM;
+
 @Autonomous(name = "BlueAudienceSidePedro", group = "Pedro:Blues", preselectTeleOp = "TeleopFSM")
 @Configurable
 public class BlueAudience1 extends DarienOpModeFSM {
@@ -141,7 +142,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
             Intake3 = follower
                     .pathBuilder()
                     .addPath(
-                            new BezierLine(new Pose(29.000, 35.750), new Pose(25.000, 35.750))
+                            new BezierLine(new Pose(29.000, 35.750), new Pose(24.000, 35.750))
                     )
                     .setTangentHeadingInterpolation()
                     .build();
@@ -150,7 +151,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
                     .pathBuilder()
                     .addPath(
                             new BezierCurve(
-                                    new Pose(25.000, 35.750),
+                                    new Pose(24.000, 35.750),
                                     new Pose(45.000, 29.000),
                                     new Pose(56.000, 18.000)
                             )
@@ -169,8 +170,6 @@ public class BlueAudience1 extends DarienOpModeFSM {
     }
 
 
-
-
 //67
 
     public int autonomousPathUpdate() {
@@ -186,6 +185,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
                 // Set the initial tray position
                 setTrayPosition(TRAY_POS_1_SCORE);
                 tagFSM.start(getRuntime());
+                follower.setMaxPower(.8); //normal speed
                 if (pathTimer.getElapsedTimeSeconds() > 1.0) {
 
                     telemetry.addLine("Case " + pathState + ": exiting");
@@ -203,7 +203,6 @@ public class BlueAudience1 extends DarienOpModeFSM {
                 if ((tagFSM.isDone()) || pathTimer.getElapsedTimeSeconds() > 2.5) {
                     aprilTagDetections = tagFSM.getDetections();
                     aprilTagDetections.removeIf(tag -> tag.id == 20 || tag.id == 24);
-                    // TODO: Have fallback behavior if no tags detected
                     follower.followPath(paths.ShootingPosition);
 
                     setPathState(pathState + 1);
@@ -289,7 +288,6 @@ public class BlueAudience1 extends DarienOpModeFSM {
 
                     follower.setMaxPower(.8); //reset to normal speed
                     shootArtifactFSM.shotGun(SHOT_GUN_POWER_UP_FAR);
-                    rubberBands.setPower(0); //stop intake
                     follower.followPath(paths.ShootingPosition2, true);
                     setPathState(pathState + 1);
                 }
@@ -313,7 +311,7 @@ public class BlueAudience1 extends DarienOpModeFSM {
                 shootPatternFSM.updateShootPattern(getRuntime());
 
                 if (shootPatternFSM.isShootPatternDone() || pathTimer.getElapsedTimeSeconds() > 10.0) {
-
+                    rubberBands.setPower(0); //stop intake
                     follower.followPath(paths.Parking, true);
                     setPathState(-1);
                 }
