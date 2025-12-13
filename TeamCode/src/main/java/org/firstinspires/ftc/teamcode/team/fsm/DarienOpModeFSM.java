@@ -72,7 +72,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     public static final double ELEVATOR_POS_UP = 0.83;
     public static final double ELEVATOR_POS_DOWN = 0.45;
     public static final double FEEDER_POS_UP = .9;
-    public static final double FEEDER_POS_DOWN = .45;
+    public static double FEEDER_POS_DOWN = .55;
     public static double SHOT_GUN_POWER_UP = 0.32; // tuned to 6000 rpm motor at a distance of 39 inches from the front of the robot to the goal wall.
     public static double SHOT_GUN_POWER_UP_FAR = 0.40; // tuned to 6000 rpm motor
     public static double SHOT_GUN_POWER_DOWN = 0.2; // tuned to 6000 rpm motor
