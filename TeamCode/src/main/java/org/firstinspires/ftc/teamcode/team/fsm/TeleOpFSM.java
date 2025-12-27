@@ -4,12 +4,17 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierPoint;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.PathChain;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.TelemetryManager;
@@ -18,7 +23,7 @@ import com.bylazar.telemetry.TelemetryManager;
 @Config
 @Configurable
 public class TeleOpFSM extends DarienOpModeFSM {
-
+    //private Pose TARGET_LOCATION = new Pose();
     // INSTANCES
     private TelemetryManager panelsTelemetry;   // Panels Telemetry instance
     public Follower follower;                   // Pedro Pathing follower instance
@@ -31,16 +36,45 @@ public class TeleOpFSM extends DarienOpModeFSM {
     private boolean isRubberBandsReversed = false;
     private double shotStartTime;
     private boolean shotStarted = false;
+    private boolean isReadingAprilTag = false;
+    private int pathState = 0; // drive state machine state
+    private Timer pathTimer;
 
     @Override
     public void initControls() {
         super.initControls();
         follower = Constants.createFollower(hardwareMap);
+        pathTimer = new Timer();
 
         // Initialize rubber bands to off
         rubberBands.setPower(0);
         isRubberBandsReversed = false;
         //TrayServo.setPosition(currentTrayPosition); // Prevent movement at init
+    }
+
+    public int pathUpdate() {
+        switch (pathState) {
+            default:
+            case 0:
+                // Drive is in manual mode
+                break;
+            case 1:
+                // Drive is controlled by pedro path
+                if ((!follower.isBusy() || pathTimer.getElapsedTimeSeconds() > 2.0)) {
+                    pathState = 0;
+                }
+                break;
+        }
+        return pathState;
+    }
+
+    /**
+     *
+     * @param angle
+     * @return normalized angle to (-pi, pi]
+     */
+    private double normalizeRadians(double angle) {
+        return Math.atan2(Math.sin(angle), Math.cos(angle));
     }
 
     @Override
@@ -61,6 +95,7 @@ public class TeleOpFSM extends DarienOpModeFSM {
 
             follower.setTeleOpDrive(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
             follower.update();
+            pathState = pathUpdate();
 
             // -----------------
             // GAMEPAD1 CONTROLS
@@ -88,6 +123,66 @@ public class TeleOpFSM extends DarienOpModeFSM {
                 // -----------------
                 // MANUAL CONTROLS: only allowed when not in shooting macro
                 // -----------------
+
+                //CONTROL: POINT ROBOT TO GOAL
+                /*
+                if (gamepad1.left_bumper) {
+
+                    //point robot at blue goal if gamepad1 left bumper is pressed
+                    aprilTagDetections = tagFSM.getDetections();
+                    aprilTagDetections.removeIf(tag -> tag.id == 21 || tag.id == 22 || tag.id == 23 || tag.id == 24);
+                   // TARGET_LOCATION = new Pose(follower.getPose().getX(), follower.getPose().getY(),aprilTagDetections.getFirst().ftcPose.bearing);
+
+                    follower.pathBuilder().setLinearHeadingInterpolation(follower.getHeading(), aprilTagDetections.get(0).ftcPose.bearing);
+
+                }
+
+                 */
+                if (gamepad1.right_trigger > 0.05 && !isReadingAprilTag) {
+                    //point robot at red goal if gamepad1 right bumper is pressed
+                    tagFSM.start(getRuntime());
+                    isReadingAprilTag = true;
+
+                } else if (isReadingAprilTag) {
+                    tagFSM.update(getRuntime(), true, telemetry);
+                    telemetry.addLine("Reading...");
+
+                    if (tagFSM.isDone()) {
+                        telemetry.addLine("DONE READING!");
+                        isReadingAprilTag = false;
+                        aprilTagDetections = tagFSM.getDetections();
+                        //aprilTagDetections.removeIf(tag -> tag.id != 24);
+                        aprilTagDetections.removeIf(tag -> tag.id == 20 || tag.id == 21 || tag.id == 22 || tag.id == 23);
+                        if (!aprilTagDetections.isEmpty()) {
+                            telemetry.addLine("FOUND APRILTAG!");
+                            tagFSM.telemetryAprilTag(telemetry);
+                            // Rotate the robot only if an apriltag is detected and it's the blue goal apriltag id
+                            AprilTagDetection detection = aprilTagDetections.get(0);
+                            PathChain rotatePath;
+                            if (detection.id == 24) {
+                                telemetry.addLine("ALIGNING TO GOAL...");
+                                telemetry.addData("H1:", follower.getHeading());
+                                telemetry.addData("H2:", detection.ftcPose.bearing);
+                                double currentHeading = follower.getHeading();
+                                double relativeHeading = detection.ftcPose.bearing;
+                                double targetHeading = normalizeRadians(currentHeading + relativeHeading);
+                                rotatePath = follower.pathBuilder()
+                                        .addPath(
+                                                new BezierPoint(new Pose(follower.getPose().getX(), follower.getPose().getY()))
+                                        )
+                                        .setLinearHeadingInterpolation(currentHeading, targetHeading)
+                                        .build();
+
+                                follower.followPath(rotatePath);
+
+
+                                pathTimer.resetTimer();
+                                pathState = 1;
+                            } // end detection.id == 24
+                        } // end detection is empty
+                    } // end tagFSM is done
+
+                } // end Red Goal April Tag
 
                 //CONTROL: EJECTION MOTORS
                 if (gamepad2.right_trigger > 0.05 && gamepad2.right_stick_y >= -0.05) {
@@ -215,6 +310,7 @@ public class TeleOpFSM extends DarienOpModeFSM {
                     shotStarted = true;
                 }
                 telemetry.addData("shotStarted", shotStarted);
+                telemetry.addData("H1:", follower.getHeading());
 
             } //manual controls
             else {
