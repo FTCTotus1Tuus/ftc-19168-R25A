@@ -7,6 +7,7 @@ import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -46,7 +47,7 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
     //public DcMotor omniMotor0, omniMotor1, omniMotor2, omniMotor3;
     public Servo TrayServo, Elevator, Feeder, IntakeServo;
     public CRServo rubberBands;
-    public DcMotor ejectionMotorRight, ejectionMotorLeft;
+    public DcMotorEx ejectionMotor;
     public NormalizedColorSensor intakeColorSensor;
 
     // HARDWARE FIXED CONSTANTS
@@ -118,12 +119,8 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
         // INITIALIZE MOTORS
         //ejectionMotorRight = initializeMotor("ejectionMotorRight");
-        ejectionMotorRight = hardwareMap.get(DcMotor.class, "ejectionMotorRight");
-        ejectionMotorRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-        //ejectionMotorLeft = initializeMotor("ejectionMotorLeft");
-        ejectionMotorLeft = hardwareMap.get(DcMotor.class, "ejectionMotorLeft");
-        ejectionMotorLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        ejectionMotor = hardwareMap.get(DcMotorEx.class, "ejectionMotor");
+        ejectionMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.FLOAT);
 
         initAprilTag();
 
@@ -237,10 +234,74 @@ public abstract class DarienOpModeFSM extends LinearOpMode {
 
     }
 
-    public double getVoltageAdjustedMotorPower(double power) {
+    public double getRPMAdjustedMotorPower(double power) {
+        double ticksPerSecond = ejectionMotor.getVelocity();
+        double TICKS_PER_REV = 537.7;
+        double rpm = (ticksPerSecond / TICKS_PER_REV) * 60;
+        double targetRPMClose = 1920;
+        double targetRPMFar = 2400;
+
+
+
+        /*
         double nominalVoltage = 13.0; // Typical full battery voltage for FTC
         double currentVoltage = hardwareMap.voltageSensor.iterator().next().getVoltage();
         double scale = nominalVoltage / currentVoltage;
         return power * scale;
+         */
+        return power;
+    }
+    private double rpmIntegral = 0.0;
+    private double lastRpmTime = -1.0;
+    private static final double RPM_KP = 0.0006;        // proportional gain (tune as needed)
+    private static final double RPM_KI = 0.00012;       // integral gain (tune as needed)
+    private static final double RPM_INTEGRAL_MAX = 5.0; // anti-windup clamp
+    public double getRPMAdjustedMotorPower(double requestedPower, boolean useFarTarget) {
+        double sign = Math.signum(requestedPower);
+        if (sign == 0.0) sign = 1.0; // assume forward if caller passed 0
+
+        double currentTime = getRuntime();
+        double dt = (lastRpmTime < 0.0) ? 0.0 : (currentTime - lastRpmTime);
+        lastRpmTime = currentTime;
+
+        try {
+            // read encoder velocity (ticks per second) and compute RPM
+            double ticksPerSecond = ejectionMotor.getVelocity();
+            double TICKS_PER_REV = 537.7;
+            double rpm = (ticksPerSecond / TICKS_PER_REV) * 60.0;
+            double targetRPMClose = 1920;
+            double targetRPMFar = 2400;
+
+            // choose target RPM
+            double targetRPM = useFarTarget ? targetRPMFar : targetRPMClose;
+
+            // control on magnitude (use absolute RPM)
+            double measured = Math.abs(rpm);
+            double error = targetRPM - measured;
+
+            // integrate error
+            if (dt > 0.0) {
+                rpmIntegral += error * dt;
+                rpmIntegral = Math.max(-RPM_INTEGRAL_MAX, Math.min(RPM_INTEGRAL_MAX, rpmIntegral));
+            }
+
+            // PI controller -> desired magnitude in \[0,1\]
+            double control = RPM_KP * error + RPM_KI * rpmIntegral;
+
+            // convert control from RPM error units to a motor power magnitude.
+            // Because gains are tuned in power per RPM error, we simply add control to a small baseline.
+            // Baseline can be the absolute requested power magnitude (so operator can request direction),
+            // or a small feedforward if you prefer.
+            double baseMag = Math.max(0.0, Math.abs(requestedPower) * 0.0); // keep 0 feedforward by default
+            double outMag = baseMag + control;
+
+            // clamp final magnitude to [0,1]
+            outMag = Math.max(0.0, Math.min(1.0, outMag));
+
+            return sign * outMag;
+        } catch (Exception ignored) {
+            // if encoder isn't available, fall back to requested power (clamped)
+            return Math.max(-1.0, Math.min(1.0, requestedPower));
+        }
     }
 }
